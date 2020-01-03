@@ -7,7 +7,9 @@ import androidx.core.app.TaskStackBuilder
 
 import ua.makovskyi.notificator.dsl.NotificationMarker
 import ua.makovskyi.notificator.dsl.PendingIntentMarker
+import ua.makovskyi.notificator.dsl.TaskStackMarker
 import ua.makovskyi.notificator.utils.buildMessage
+import ua.makovskyi.notificator.utils.fromFirst
 import ua.makovskyi.notificator.utils.isSingle
 import ua.makovskyi.notificator.utils.safe
 
@@ -21,33 +23,57 @@ enum class From {
     BROADCAST
 }
 
+@TaskStackMarker
 @PendingIntentMarker
 class PendingIntentBuilder {
 
-    var from: From? = null
-    var context: Context? = null
-    var requestCode: Int = 100
-    //-
-    var taskElements: List<TaskElement> = listOf()
-    var behaviourFlags: Int = PendingIntent.FLAG_UPDATE_CURRENT
+    private var requestCode: Int = 100
+    private var pendingFlags: Int = PendingIntent.FLAG_UPDATE_CURRENT
+    private var targetIntent: From? = null
+    private var packageContext: Context? = null
+    private var taskStackElements: List<TaskStackElement> = listOf()
+
+    fun requestCode(init: () -> Int) {
+        requestCode = init()
+    }
+
+    fun pendingFlags(init: (MutableList<Int>) -> Unit) {
+        pendingFlags = mutableListOf<Int>()
+            .apply(init)
+            .reduce { acc, flag ->
+                acc or flag
+            }
+    }
+
+    fun targetIntent(init: () -> From) {
+        targetIntent = init()
+    }
+
+    fun packageContext(init: () -> Context) {
+        packageContext = init()
+    }
+
+    fun taskStackElements(init: (MutableList<TaskStackElement>) -> Unit) {
+        taskStackElements = mutableListOf<TaskStackElement>().apply(init)
+    }
 
     internal fun build(init: PendingIntentBuilder.() -> Unit): PendingIntent {
         init()
-        require(taskElements.isNotEmpty()) {
+        require(taskStackElements.isNotEmpty()) {
             buildMessage(
                 PendingIntentBuilder::class,
                 "Can not create pending intent from empty tasks list")
         }
-        val ctx = requireNotNull(context) {
+        val context = requireNotNull(packageContext) {
             buildMessage(
                 PendingIntentBuilder::class,
                 "To create pending intent, please pass your package context")
         }
-        return when(from) {
+        return when(targetIntent) {
             From.SERVICE -> {
-                val intent = taskElements.first().intent
+                val intent = taskStackElements.fromFirst { e -> e?.intent }
                 if (intent != null) {
-                    PendingIntent.getService(ctx, requestCode, intent, behaviourFlags)
+                    PendingIntent.getService(context, requestCode, intent, pendingFlags)
                 } else {
                     throw IllegalArgumentException(
                         buildMessage(
@@ -56,14 +82,14 @@ class PendingIntentBuilder {
                 }
             }
             From.ACTIVITY -> {
-                if (taskElements.isSingle()) {
-                    taskElements.first().intent.let { intent ->
-                        PendingIntent.getActivity(ctx, requestCode, intent, behaviourFlags)
+                if (taskStackElements.isSingle()) {
+                    taskStackElements.fromFirst { e -> e?.intent }.let { intent ->
+                        PendingIntent.getActivity(context, requestCode, intent, pendingFlags)
                     }
 
                 } else {
-                    requireNotNull(TaskStackBuilder.create(ctx).run {
-                        for (element in taskElements) {
+                    requireNotNull(TaskStackBuilder.create(context).run {
+                        for (element in taskStackElements) {
                             element.intent.safe { intent ->
                                 when(element.howPut) {
                                     HowPut.ONLY_NEXT_INTENT -> addNextIntent(intent)
@@ -72,14 +98,14 @@ class PendingIntentBuilder {
                                 }
                             }
                         }
-                        getPendingIntent(requestCode, behaviourFlags)
+                        getPendingIntent(requestCode, pendingFlags)
                     })
                 }
             }
             From.BROADCAST -> {
-                val intent = taskElements.first().intent
+                val intent = taskStackElements.fromFirst { e -> e?.intent }
                 if (intent != null) {
-                    PendingIntent.getBroadcast(ctx, requestCode, intent, behaviourFlags)
+                    PendingIntent.getBroadcast(context, requestCode, intent, pendingFlags)
                 } else {
                     throw IllegalArgumentException(
                         buildMessage(
@@ -98,16 +124,20 @@ class PendingIntentBuilder {
 }
 
 class Intention private constructor(
-    val autoCancel: Boolean,
-    val pendingIntent: PendingIntent?
+    internal val autoCancel: Boolean,
+    internal val pendingIntent: PendingIntent?
 ) {
 
     @NotificationMarker
     @PendingIntentMarker
     class Builder(
-        var autoCancel: Boolean = true,
-        var pendingIntent: PendingIntent? = null
+        private var autoCancel: Boolean = true,
+        private var pendingIntent: PendingIntent? = null
     ) {
+
+        fun autoCancel(init: () -> Boolean) {
+            autoCancel = init()
+        }
 
         fun contentIntent(init: PendingIntentBuilder.() -> Unit) {
             pendingIntent = PendingIntentBuilder().build(init)

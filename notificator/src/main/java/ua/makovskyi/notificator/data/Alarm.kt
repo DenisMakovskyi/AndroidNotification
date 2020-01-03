@@ -12,22 +12,34 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  */
 
 data class LEDLight(
-    val argb: Int = Color.BLUE,
-    val onMs: Int = TimeUnit.SECONDS.toMillis(1).toInt(),
-    val offMs: Int = TimeUnit.SECONDS.toMillis(1).toInt())
+    internal val argb: Int = Color.BLUE,
+    internal val onMs: Int = TimeUnit.SECONDS.toMillis(1).toInt(),
+    internal val offMs: Int = TimeUnit.SECONDS.toMillis(1).toInt())
 
 class Alarm private constructor(
-    val sound: Uri?,
-    val vibrate: LongArray?,
-    val ledLight: LEDLight?
+    internal val sound: Uri?,
+    internal val vibrate: LongArray?,
+    internal val ledLight: LEDLight?
 ) {
 
     @NotificationMarker
     class Builder(
-        var sound: Uri? = null,
-        var vibrate: LongArray? = null,
-        var ledLight: LEDLight? = null
+        private var sound: Uri? = null,
+        private var vibrate: LongArray? = null,
+        private var ledLight: LEDLight? = null
     ) {
+
+        fun sound(init: () -> Uri) {
+            sound = init()
+        }
+
+        fun vibrate(init: () -> LongArray) {
+            vibrate = init()
+        }
+
+        fun ledLight(init: () -> LEDLight) {
+            ledLight = init()
+        }
 
         internal fun build(init: Builder.() -> Unit): Alarm {
             init()

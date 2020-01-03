@@ -1,7 +1,11 @@
 package ua.makovskyi.notificator.data
 
 import android.graphics.Bitmap
-import android.app.Notification
+
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.core.app.NotificationCompat.BadgeIconType
+import androidx.core.app.NotificationCompat.BADGE_ICON_NONE
 
 import ua.makovskyi.notificator.dsl.NotificationMarker
 
@@ -10,26 +14,46 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  */
 
 class Icons private constructor(
-    val badgeType: Int,
-    val smallIcon: Int,
-    val smallTint: Int,
-    val largeIcon: Bitmap?
+    internal val badgeType: Int,
+    internal val smallIcon: Int,
+    internal val smallTint: Int,
+    internal val largeIcon: Bitmap?
 ) {
 
     @NotificationMarker
     class Builder(
-        var badgeType: Int = Notification.BADGE_ICON_NONE,
-        var smallIcon: Int = 0,
-        var smallTint: Int = 0,
-        var largeIcon: Bitmap? = null
+        @BadgeIconType
+        private var badgeType: Int = BADGE_ICON_NONE,
+        @DrawableRes
+        private var smallIcon: Int = 0,
+        @ColorRes
+        private var smallTint: Int = 0,
+        private var largeIcon: Bitmap? = null
     ) {
+
+        fun badgeType(init: () -> Int) {
+            badgeType = init()
+        }
+
+        fun smallIcon(init: () -> Int) {
+            smallIcon = init()
+        }
+
+        fun smallTint(init: () -> Int) {
+            smallTint = init()
+        }
+
+        fun largeIcon(init: () -> Bitmap?) {
+            largeIcon = init()
+        }
 
         internal fun build(init: Builder.() -> Unit): Icons {
             init()
             return build()
         }
 
-        internal fun build(): Icons = Icons(badgeType, smallIcon, smallTint, largeIcon)
+        internal fun build(): Icons =
+            Icons(badgeType, smallIcon, smallTint, largeIcon)
     }
 }
 

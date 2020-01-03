@@ -9,6 +9,10 @@ import android.os.Parcelable
  * @author Denis Makovskyi
  */
 
+internal fun <T> T.only(block: (T) -> Unit) {
+    block(this)
+}
+
 internal fun <T> T?.safe(block: (T) -> Unit) {
     if (this != null) block(this)
 }
@@ -17,12 +21,13 @@ internal fun <T> T?.safeOr(block: (T) -> Unit, otherwise: () -> Unit) {
     if (this != null) block(this) else otherwise()
 }
 
-internal fun <T> T.only(block: (T) -> Unit) {
-    block(this)
-}
-
 internal fun Collection<*>.isSingle(): Boolean {
     return this.size == 1
+}
+
+internal fun <T, R> List<T>.fromFirst(block: (T?) -> R?): R? {
+    if (isEmpty()) throw NoSuchElementException("List is empty.")
+    return block(this[0])
 }
 
 internal fun <V> Map<String, V?>.toBundle(): Bundle {

@@ -21,7 +21,7 @@ import ua.makovskyi.notificator.utils.*
 object Notificator {
 
     fun showNotification(context: Context, notification: Notification) {
-        NotificationCompat.Builder(context, notification.channel.channelInfo.id).apply {
+        NotificationCompat.Builder(context, notification.channel.channelInfo.channelId).apply {
             // - alarm
             notification.alarm.sound.safe { uri ->
                 setSound(uri)
@@ -83,11 +83,11 @@ object Notificator {
                 // - channel and channel group
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     // - channel
-                    if (getNotificationChannel(notification.channel.channelInfo.id) == null) {
+                    if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
                         createNotificationChannel(createChannel(notification.channel, notification.alarm))
                     }
                     // - group
-                    notification.channel.groupingParams?.id.safe { groupId ->
+                    notification.channel.groupingParams?.groupId.safe { groupId ->
                         if (getNotificationChannelGroup(groupId) == null) {
                             createChannelGroup(notification.channel).safe { group ->
                                 createNotificationChannelGroup(group)
@@ -96,21 +96,21 @@ object Notificator {
                     }
                 }
             }
-            manager?.notify(notification.identifier.notificationId, builder.build())
+            manager?.notify(notification.identifier.id, builder.build())
         }
     }
 
     @TargetApi(Build.VERSION_CODES.O)
     fun createChannel(channel: Channel, alarm: Alarm): NotificationChannel =
         NotificationChannel(
-            channel.channelInfo.id,
-            channel.channelInfo.name,
+            channel.channelInfo.channelId,
+            channel.channelInfo.channelName,
             channel.importance.importance
         ).apply {
-            channel.channelInfo.description.safe { channelDescription ->
+            channel.channelInfo.channelDescription.safe { channelDescription ->
                 description = channelDescription
             }
-            channel.groupingParams?.id.safe { groupId ->
+            channel.groupingParams?.groupId.safe { groupId ->
                 group = groupId
             }
             // - sound
@@ -145,10 +145,10 @@ object Notificator {
 
     @TargetApi(Build.VERSION_CODES.O)
     fun createChannelGroup(channel: Channel): NotificationChannelGroup? =
-        if (channel.groupingParams?.id != null && channel.groupingParams.name != null) {
-            NotificationChannelGroup(channel.groupingParams.id, channel.groupingParams.name).apply {
+        if (channel.groupingParams?.groupId != null && channel.groupingParams.groupName != null) {
+            NotificationChannelGroup(channel.groupingParams.groupId, channel.groupingParams.groupName).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    channel.groupingParams.description.safe { groupDescription ->
+                    channel.groupingParams.groupDescription.safe { groupDescription ->
                         description = groupDescription
                     }
                 }

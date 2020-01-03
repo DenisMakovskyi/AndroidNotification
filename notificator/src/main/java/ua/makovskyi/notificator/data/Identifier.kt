@@ -7,24 +7,36 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  */
 
 class Identifier private constructor(
-    val notificationId: Int,
-    val groupKey: String?,
-    val sortKey: String?
+    internal val id: Int,
+    internal val sortKey: String?,
+    internal val groupKey: String?
 ) {
 
     @NotificationMarker
     class Builder(
-        var notificationId: Int = 0,
-        var groupKey: String? = null,
-        var sortKey: String? = null
+        private var id: Int = 0,
+        private var sortKey: String? = null,
+        private var groupKey: String? = null
     ) {
+
+        fun id(init: () -> Int) {
+            id = init()
+        }
+
+        fun sortKey(init: () -> String?) {
+            sortKey = init()
+        }
+
+        fun groupKey(init: () -> String?) {
+            groupKey = init()
+        }
 
         internal fun build(init: Builder.() -> Unit): Identifier {
             init()
             return build()
         }
 
-        internal fun build(): Identifier = Identifier(notificationId, groupKey, sortKey)
+        internal fun build(): Identifier = Identifier(id, sortKey, groupKey)
     }
 }
 

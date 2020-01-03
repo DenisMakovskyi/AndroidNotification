@@ -10,22 +10,22 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  */
 
 class Notification private constructor(
-    val alarm: Alarm,
-    val icons: Icons,
-    val content: Content,
-    val channel: Channel,
-    val intention: Intention,
-    val identifier: Identifier
+    internal val alarm: Alarm,
+    internal val icons: Icons,
+    internal val content: Content,
+    internal val channel: Channel,
+    internal val intention: Intention,
+    internal val identifier: Identifier
 ) {
 
     @NotificationMarker
     class Builder(
-        var alarm: Alarm = Alarm.Builder().build(),
-        var icons: Icons = Icons.Builder().build(),
-        var content: Content = Content.Builder().build(),
-        var channel: Channel = Channel.Builder().build(),
-        var intention: Intention = Intention.Builder().build(),
-        var identifier: Identifier = Identifier.Builder().build()
+        private var alarm: Alarm = Alarm.Builder().build(),
+        private var icons: Icons = Icons.Builder().build(),
+        private var content: Content = Content.Builder().build(),
+        private var channel: Channel = Channel.Builder().build(),
+        private var intention: Intention = Intention.Builder().build(),
+        private var identifier: Identifier = Identifier.Builder().build()
     ) {
 
         fun alarm(init: Alarm.Builder.() -> Unit) {
