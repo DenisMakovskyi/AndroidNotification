@@ -130,7 +130,7 @@ object Notificator {
                         setUsage(AudioAttributes.USAGE_NOTIFICATION)
                         setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            setAllowedCapturePolicy(AudioAttributes.ALLOW_CAPTURE_BY_ALL)
+                            setAllowedCapturePolicy(alarm.capturePolicy.policy)
                         }
                     }.build())
             }

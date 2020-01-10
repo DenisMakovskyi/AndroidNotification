@@ -11,6 +11,14 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  * @author Denis Makovskyi
  */
 
+/**
+ * Notification importance parameter.
+ *
+ * Compatible with all SDK levels.
+ *
+ * @param priority - for SDK < 24 (Oreo)
+ * @param importance - for SDK >= 24 (Oreo)
+ */
 sealed class Importance(val priority: Int, val importance: Int) {
 
     object MIN : Importance(PRIORITY_MIN, IMPORTANCE_MIN)
@@ -20,6 +28,15 @@ sealed class Importance(val priority: Int, val importance: Int) {
     object DEFAULT : Importance(PRIORITY_DEFAULT, IMPORTANCE_DEFAULT)
 }
 
+/**
+ * Notification channel info parameters.
+ *
+ * Will be ignored if SDK level is less than 24 (Oreo).
+ *
+ * @param channelId - notification channel ID.
+ * @param channelName - notification channel name (human readable, will be displayed in applications manager).
+ * @param channelDescription - notification channel description (human readable, will be displayed in applications manager).
+ */
 class ChannelInfo private constructor(
     internal val channelId: String,
     internal val channelName: String,
@@ -50,11 +67,21 @@ class ChannelInfo private constructor(
             return build()
         }
 
-        internal fun build(): ChannelInfo =
-            ChannelInfo(channelId, channelName, channelDescription)
+        internal fun build(): ChannelInfo = ChannelInfo(channelId, channelName, channelDescription)
     }
 }
 
+/**
+ * Notification channel group parameters.
+ *
+ * Will be ignored if SDK level is less than 24 (Oreo).
+ *
+ * @param groupId - id of the group. Must be unique per package. The value may be truncated if it is too long.
+ * @param groupName - human readable name of the group. The recommended maximum length is 40 characters (1).
+ * @param groupDescription - human readable description of this group. The recommended maximum length is 300 characters (1).
+ *
+ * (1) - the value may be truncated if it is too long.
+ */
 class GroupingParams private constructor(
     internal val groupId: String?,
     internal val groupName: String?,
@@ -92,6 +119,15 @@ class GroupingParams private constructor(
 
 fun channelGroupingParams(init: GroupingParams.Builder.() -> Unit): GroupingParams = GroupingParams.Builder().build(init)
 
+/**
+ * Notification Channel settings.
+ *
+ * If SDK does not support Notification Channels - channelInfo and groupingParams will be ignored.
+ *
+ * @param importance - notification importance.
+ * @param channelInfo - notification channel info parameters.
+ * @param groupingParams - notification channel grouping parameters.
+ */
 class Channel private constructor(
     internal val importance: Importance,
     internal val channelInfo: ChannelInfo,

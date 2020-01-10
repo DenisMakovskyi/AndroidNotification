@@ -2,12 +2,12 @@ package ua.makovskyi.notificator.data
 
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 
 import ua.makovskyi.notificator.dsl.IntentMarker
 import ua.makovskyi.notificator.dsl.TaskStackMarker
 import ua.makovskyi.notificator.utils.buildMessage
 import ua.makovskyi.notificator.utils.safe
-import ua.makovskyi.notificator.utils.toBundle
 
 /**
  * @author Denis Makovskyi
@@ -18,9 +18,9 @@ class IntentBuilder(
     private var context: Context? = null,
     private var targetClass: Class<*>? = null,
     private var intentAction: String? = null,
+    private var intentExtras: Bundle? = null,
     private var intentBehaviour: List<Int>? = null,
-    private var intentCategories: List<String>? = null,
-    private var intentBundleExtras: Map<String, Any?>? = null
+    private var intentCategories: List<String>? = null
 ) {
 
     fun context(init: () -> Context) {
@@ -35,16 +35,16 @@ class IntentBuilder(
         intentAction = init()
     }
 
+    fun intentExtras(init: () -> Bundle) {
+        intentExtras = init()
+    }
+
     fun intentBehaviour(init: (MutableList<Int>) -> Unit) {
         intentBehaviour = mutableListOf<Int>().apply(init)
     }
 
     fun intentCategories(init: (MutableList<String>) -> Unit) {
         intentCategories = mutableListOf<String>().apply(init)
-    }
-
-    fun intentBundleExtras(init: (Map<String, Any?>) -> Unit) {
-        intentBundleExtras = hashMapOf<String, Any?>().apply(init)
     }
 
     internal fun build(init: IntentBuilder.() -> Unit): Intent {
@@ -67,6 +67,9 @@ class IntentBuilder(
             this@IntentBuilder.intentAction.safe { action ->
                 intent.action = action
             }
+            this@IntentBuilder.intentExtras.safe { bundle ->
+                intent.putExtras(bundle)
+            }
             this@IntentBuilder.intentBehaviour.safe { flags ->
                 for (flag in flags) {
                     intent.addFlags(flag)
@@ -76,9 +79,6 @@ class IntentBuilder(
                 for (category in categories) {
                     intent.addCategory(category)
                 }
-            }
-            this@IntentBuilder.intentBundleExtras.safe { arguments ->
-                intent.putExtras(arguments.toBundle())
             }
         }
     }
