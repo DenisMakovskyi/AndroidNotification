@@ -125,22 +125,28 @@ class PendingIntentBuilder {
 
 class Intention private constructor(
     internal val autoCancel: Boolean,
-    internal val pendingIntent: PendingIntent?
+    internal val deleteIntent: PendingIntent?,
+    internal val contentIntent: PendingIntent?
 ) {
 
     @NotificationMarker
     @PendingIntentMarker
     class Builder(
         private var autoCancel: Boolean = true,
-        private var pendingIntent: PendingIntent? = null
+        private var deleteIntent: PendingIntent? = null,
+        private var contentIntent: PendingIntent? = null
     ) {
 
         fun autoCancel(init: () -> Boolean) {
             autoCancel = init()
         }
 
+        fun deleteIntent(init: PendingIntentBuilder.() -> Unit) {
+            deleteIntent = PendingIntentBuilder().build(init)
+        }
+
         fun contentIntent(init: PendingIntentBuilder.() -> Unit) {
-            pendingIntent = PendingIntentBuilder().build(init)
+            contentIntent = PendingIntentBuilder().build(init)
         }
 
         internal fun build(init: Builder.() -> Unit): Intention {
@@ -148,7 +154,7 @@ class Intention private constructor(
             return build()
         }
 
-        internal fun build(): Intention = Intention(autoCancel, pendingIntent)
+        internal fun build(): Intention = Intention(autoCancel, deleteIntent, contentIntent)
     }
 }
 

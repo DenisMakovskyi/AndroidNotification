@@ -23,11 +23,11 @@ class Identifier private constructor(
             id = init()
         }
 
-        fun sortKey(init: () -> String?) {
+        fun sortKey(init: () -> String) {
             sortKey = init()
         }
 
-        fun groupKey(init: () -> String?) {
+        fun groupKey(init: () -> String) {
             groupKey = init()
         }
 

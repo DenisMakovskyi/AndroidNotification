@@ -41,7 +41,7 @@ class ChannelInfo private constructor(
             channelName = init()
         }
 
-        fun channelDescription(init: () -> String?) {
+        fun channelDescription(init: () -> String) {
             channelDescription = init()
         }
 
@@ -68,15 +68,15 @@ class GroupingParams private constructor(
         private var groupDescription: String? = null
     ) {
 
-        fun groupId(init: () -> String?) {
+        fun groupId(init: () -> String) {
             groupId = init()
         }
 
-        fun groupName(init: () -> String?) {
+        fun groupName(init: () -> String) {
             groupName = init()
         }
 
-        fun groupDescription(init: () -> String?) {
+        fun groupDescription(init: () -> String) {
             groupDescription = init()
         }
 
@@ -90,6 +90,7 @@ class GroupingParams private constructor(
     }
 }
 
+fun channelGroupingParams(init: GroupingParams.Builder.() -> Unit): GroupingParams = GroupingParams.Builder().build(init)
 
 class Channel private constructor(
     internal val importance: Importance,
@@ -122,8 +123,7 @@ class Channel private constructor(
             return build()
         }
 
-        internal fun build(): Channel =
-            Channel(importance, channelInfo, groupingParams)
+        internal fun build(): Channel = Channel(importance, channelInfo, groupingParams)
     }
 }
 

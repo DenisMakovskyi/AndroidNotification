@@ -20,12 +20,12 @@ class Notification private constructor(
 
     @NotificationMarker
     class Builder(
-        private var alarm: Alarm = Alarm.Builder().build(),
-        private var icons: Icons = Icons.Builder().build(),
-        private var content: Content = Content.Builder().build(),
-        private var channel: Channel = Channel.Builder().build(),
-        private var intention: Intention = Intention.Builder().build(),
-        private var identifier: Identifier = Identifier.Builder().build()
+        var alarm: Alarm = Alarm.Builder().build(),
+        var icons: Icons = Icons.Builder().build(),
+        var content: Content = Content.Builder().build(),
+        var channel: Channel = Channel.Builder().build(),
+        var intention: Intention = Intention.Builder().build(),
+        var identifier: Identifier = Identifier.Builder().build()
     ) {
 
         fun alarm(init: Alarm.Builder.() -> Unit) {

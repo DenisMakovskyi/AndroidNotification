@@ -43,7 +43,7 @@ class Icons private constructor(
             smallTint = init()
         }
 
-        fun largeIcon(init: () -> Bitmap?) {
+        fun largeIcon(init: () -> Bitmap) {
             largeIcon = init()
         }
 
@@ -52,8 +52,7 @@ class Icons private constructor(
             return build()
         }
 
-        internal fun build(): Icons =
-            Icons(badgeType, smallIcon, smallTint, largeIcon)
+        internal fun build(): Icons = Icons(badgeType, smallIcon, smallTint, largeIcon)
     }
 }
 

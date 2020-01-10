@@ -48,6 +48,10 @@ object Notificator {
                 }
             }
             // - content
+            notification.content.time.safe { time ->
+                setWhen(time)
+                setShowWhen(true)
+            }
             val textStyle = NotificationCompat.BigTextStyle()
             notification.content.info.safe { info ->
                 setContentInfo(info)
@@ -64,7 +68,10 @@ object Notificator {
             setStyle(textStyle)
             // - intention
             setAutoCancel(notification.intention.autoCancel)
-            notification.intention.pendingIntent.safe { intent ->
+            notification.intention.deleteIntent.safe { intent ->
+                setDeleteIntent(intent)
+            }
+            notification.intention.contentIntent.safe { intent ->
                 setContentIntent(intent)
             }
             // - identifier
@@ -79,24 +86,27 @@ object Notificator {
             priority = notification.channel.importance.priority
 
         }.only { builder ->
-            val manager = context.findSystemService<NotificationManagerCompat>()?.apply {
-                // - channel and channel group
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    // - channel
-                    if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
-                        createNotificationChannel(createChannel(notification.channel, notification.alarm))
-                    }
-                    // - group
-                    notification.channel.groupingParams?.groupId.safe { groupId ->
-                        if (getNotificationChannelGroup(groupId) == null) {
-                            createChannelGroup(notification.channel).safe { group ->
-                                createNotificationChannelGroup(group)
+            context.findSystemService<NotificationManagerCompat>()
+                ?.apply {
+                    // - channel and channel group
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        // - channel
+                        if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
+                            createNotificationChannel(createChannel(notification.channel, notification.alarm))
+                        }
+                        // - group
+                        notification.channel.groupingParams.safe { groupingParams ->
+                            if (groupingParams.groupId != null && getNotificationChannelGroup(groupingParams.groupId) == null) {
+                                createChannelGroup(groupingParams).safe { group ->
+                                    createNotificationChannelGroup(group)
+                                }
                             }
                         }
                     }
                 }
-            }
-            manager?.notify(notification.identifier.id, builder.build())
+                .safe { manager ->
+                    manager.notify(notification.identifier.id, builder.build())
+                }
         }
     }
 
@@ -105,7 +115,7 @@ object Notificator {
         NotificationChannel(
             channel.channelInfo.channelId,
             channel.channelInfo.channelName,
-            channel.importance.importance
+            channel.importance.importance // importance after Oreo
         ).apply {
             channel.channelInfo.channelDescription.safe { channelDescription ->
                 description = channelDescription
@@ -125,30 +135,24 @@ object Notificator {
                     }.build())
             }
             // - vibration
-            alarm.vibrate.safeOr(
-                { pattern ->
-                    enableVibration(true)
-                    vibrationPattern = pattern
+            alarm.vibrate.safe { pattern ->
+                enableVibration(true)
+                vibrationPattern = pattern
 
-                },
-                { enableVibration(false) }
-            )
+            }
             // - led indicator
-            alarm.ledLight.safeOr(
-                { led ->
-                    enableLights(true)
-                    lightColor = led.argb
-                },
-                { enableLights(false) }
-            )
+            alarm.ledLight.safe { led ->
+                enableLights(true)
+                lightColor = led.argb
+            }
         }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun createChannelGroup(channel: Channel): NotificationChannelGroup? =
-        if (channel.groupingParams?.groupId != null && channel.groupingParams.groupName != null) {
-            NotificationChannelGroup(channel.groupingParams.groupId, channel.groupingParams.groupName).apply {
+    fun createChannelGroup(groupingParams: GroupingParams): NotificationChannelGroup? =
+        if (groupingParams.groupId != null && groupingParams.groupName != null) {
+            NotificationChannelGroup(groupingParams.groupId, groupingParams.groupName).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    channel.groupingParams.groupDescription.safe { groupDescription ->
+                    groupingParams.groupDescription.safe { groupDescription ->
                         description = groupDescription
                     }
                 }
