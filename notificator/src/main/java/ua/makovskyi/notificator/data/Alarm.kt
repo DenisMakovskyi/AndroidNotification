@@ -65,15 +65,15 @@ class Alarm private constructor(
         private var capturePolicy: CapturePolicy = CapturePolicy.ALLOW_BY_ALL
     ) {
 
-        fun sound(init: () -> Uri) {
+        fun sound(init: () -> Uri?) {
             sound = init()
         }
 
-        fun vibrate(init: () -> LongArray) {
+        fun vibrate(init: () -> LongArray?) {
             vibrate = init()
         }
 
-        fun ledLight(init: () -> LEDLight) {
+        fun ledLight(init: () -> LEDLight?) {
             ledLight = init()
         }
 

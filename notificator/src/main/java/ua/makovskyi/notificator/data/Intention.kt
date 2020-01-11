@@ -137,8 +137,8 @@ class Intention private constructor(
         private var contentIntent: PendingIntent? = null
     ) {
 
-        fun autoCancel(init: () -> Boolean) {
-            autoCancel = init()
+        fun autoCancel(init: () -> Boolean?) {
+            autoCancel = init() ?: return
         }
 
         fun deleteIntent(init: PendingIntentBuilder.() -> Unit) {
