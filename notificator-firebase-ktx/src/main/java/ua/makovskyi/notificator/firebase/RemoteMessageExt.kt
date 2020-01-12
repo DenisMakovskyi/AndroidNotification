@@ -112,7 +112,10 @@ fun RemoteMessage.wrap(applicationContext: Context): Notification {
         }
         intention {
             autoCancel { ofAutoCancel() }
-            contentIntent { ofContentIntent() }
+            // FIXME: 1/13/20 dirty hack
+            ofContentIntent()?.apply {
+                this@intention.contentIntent { this }
+            }
         }
     }
 }
