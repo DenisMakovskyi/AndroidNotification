@@ -1,4 +1,4 @@
-package ua.makovskyi.androidnotification.firebase
+package ua.makovskyi.notificator.firebase
 
 import android.app.NotificationManager
 import android.content.Context

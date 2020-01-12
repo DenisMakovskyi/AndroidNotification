@@ -1,4 +1,4 @@
-package ua.makovskyi.androidnotification.firebase
+package ua.makovskyi.notificator.firebase
 
 import org.junit.Test
 
