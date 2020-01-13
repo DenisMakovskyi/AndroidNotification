@@ -2,12 +2,12 @@ package ua.makovskyi.notificator.firebase
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
-
 import com.google.firebase.messaging.RemoteMessage
-
 import ua.makovskyi.notificator.data.*
 import ua.makovskyi.notificator.utils.toBundle
+
 
 /**
  * Created by azazellj on 1/11/20.
@@ -36,9 +36,20 @@ fun RemoteMessage.ofLEDLight(): LEDLight? {
         offMs = lightSettings[2])
 }
 
-fun RemoteMessage.ofSmallIcon(context: Context): Int? {
-    val iconResName = notification?.icon ?: return null
+fun RemoteMessage.ofSmallIcon(context: Context): Int {
+    val iconResName = notification?.icon ?: return iconFromMetaData(context)
     return context.resources.getIdentifier(iconResName, "int", context.packageName)
+}
+
+fun iconFromMetaData(context: Context): Int {
+    val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+
+    val iconRes = info.metaData.getInt("com.google.firebase.messaging.default_notification_icon")
+    val appIcon = info.icon
+
+    if (iconRes != 0) return iconRes
+
+    return appIcon
 }
 
 fun RemoteMessage.ofTime(): Long? {

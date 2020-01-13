@@ -86,8 +86,7 @@ object Notificator {
             priority = notification.channel.importance.priority
 
         }.only { builder ->
-            context.findSystemService<NotificationManagerCompat>()
-                ?.apply {
+            NotificationManagerCompat.from(context).apply {
                     // - channel and channel group
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         // - channel
