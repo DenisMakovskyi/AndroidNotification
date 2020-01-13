@@ -1,10 +1,13 @@
 package ua.makovskyi.notificator.data
 
 import android.graphics.Bitmap
+
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.core.app.NotificationCompat.BADGE_ICON_NONE
 import androidx.core.app.NotificationCompat.BadgeIconType
+
 import ua.makovskyi.notificator.dsl.NotificationMarker
 
 /**
@@ -29,28 +32,29 @@ class Icons private constructor(
         private var largeIcon: Bitmap? = null
     ) {
 
-        fun badgeType(init: () -> Int) {
-            badgeType = init()
+        fun badgeType(init: () -> Int?) {
+            badgeType = init() ?: return
         }
 
         fun smallIcon(init: () -> Int?) {
             smallIcon = init() ?: return
         }
 
-        fun smallTint(init: () -> Int) {
-            smallTint = init()
+        fun smallTint(init: () -> Int?) {
+            smallTint = init() ?: return
         }
 
-        fun largeIcon(init: () -> Bitmap) {
+        fun largeIcon(init: () -> Bitmap?) {
             largeIcon = init()
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): Icons = Icons(badgeType, smallIcon, smallTint, largeIcon)
 
         internal fun build(init: Builder.() -> Unit): Icons {
             init()
             return build()
         }
-
-        internal fun build(): Icons = Icons(badgeType, smallIcon, smallTint, largeIcon)
     }
 }
 

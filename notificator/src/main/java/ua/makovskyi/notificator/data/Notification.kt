@@ -52,7 +52,7 @@ class Notification private constructor(
             identifier = Identifier.Builder().build(init)
         }
 
-        fun build(init: Builder.() -> Unit): Notification {
+        internal fun build(init: Builder.() -> Unit): Notification {
             init()
             return Notification(alarm, icons, content, channel, intention, identifier)
         }

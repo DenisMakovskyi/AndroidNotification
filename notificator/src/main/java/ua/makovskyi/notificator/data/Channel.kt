@@ -2,6 +2,7 @@ package ua.makovskyi.notificator.data
 
 import android.app.NotificationManager.*
 
+import androidx.annotation.RestrictTo
 import androidx.core.app.NotificationCompat.*
 
 import ua.makovskyi.notificator.dsl.ChannelMarker
@@ -50,24 +51,25 @@ class ChannelInfo private constructor(
         private var channelDescription: String? = null
     ) {
 
-        fun channelId(init: () -> String) {
-            channelId = init()
+        fun channelId(init: () -> String?) {
+            channelId = init() ?: return
         }
 
-        fun channelName(init: () -> String) {
-            channelName = init()
+        fun channelName(init: () -> String?) {
+            channelName = init() ?: return
         }
 
-        fun channelDescription(init: () -> String) {
+        fun channelDescription(init: () -> String?) {
             channelDescription = init()
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): ChannelInfo = ChannelInfo(channelId, channelName, channelDescription)
 
         internal fun build(init: Builder.() -> Unit): ChannelInfo {
             init()
             return build()
         }
-
-        internal fun build(): ChannelInfo = ChannelInfo(channelId, channelName, channelDescription)
     }
 }
 
@@ -95,25 +97,25 @@ class GroupingParams private constructor(
         private var groupDescription: String? = null
     ) {
 
-        fun groupId(init: () -> String) {
+        fun groupId(init: () -> String?) {
             groupId = init()
         }
 
-        fun groupName(init: () -> String) {
+        fun groupName(init: () -> String?) {
             groupName = init()
         }
 
-        fun groupDescription(init: () -> String) {
+        fun groupDescription(init: () -> String?) {
             groupDescription = init()
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): GroupingParams = GroupingParams(groupId, groupName, groupDescription)
 
         internal fun build(init: Builder.() -> Unit): GroupingParams {
             init()
             return build()
         }
-
-        internal fun build(): GroupingParams =
-            GroupingParams(groupId, groupName, groupDescription)
     }
 }
 
@@ -146,20 +148,29 @@ class Channel private constructor(
             importance = init() ?: return
         }
 
+        fun channelInfo(builder: ChannelInfo.Builder) {
+            channelInfo = builder.build()
+        }
+
         fun channelInfo(init: ChannelInfo.Builder.() -> Unit) {
             channelInfo = ChannelInfo.Builder().build(init)
+        }
+
+        fun groupingParams(builder: GroupingParams.Builder) {
+            groupingParams = builder.build()
         }
 
         fun groupingParams(init: GroupingParams.Builder.() -> Unit) {
             groupingParams = GroupingParams.Builder().build(init)
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): Channel = Channel(importance, channelInfo, groupingParams)
+
         internal fun build(init: Builder.() -> Unit): Channel {
             init()
             return build()
         }
-
-        internal fun build(): Channel = Channel(importance, channelInfo, groupingParams)
     }
 }
 

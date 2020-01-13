@@ -3,6 +3,7 @@ package ua.makovskyi.notificator.data
 import android.app.PendingIntent
 import android.content.Context
 
+import androidx.annotation.RestrictTo
 import androidx.core.app.TaskStackBuilder
 
 import ua.makovskyi.notificator.dsl.NotificationMarker
@@ -33,8 +34,8 @@ class PendingIntentBuilder {
     private var packageContext: Context? = null
     private var taskStackElements: List<TaskStackElement> = listOf()
 
-    fun requestCode(init: () -> Int) {
-        requestCode = init()
+    fun requestCode(init: () -> Int?) {
+        requestCode = init() ?: return
     }
 
     fun pendingFlags(init: (MutableList<Int>) -> Unit) {
@@ -45,11 +46,11 @@ class PendingIntentBuilder {
             }
     }
 
-    fun targetIntent(init: () -> From) {
+    fun targetIntent(init: () -> From?) {
         targetIntent = init()
     }
 
-    fun packageContext(init: () -> Context) {
+    fun packageContext(init: () -> Context?) {
         packageContext = init()
     }
 
@@ -57,8 +58,8 @@ class PendingIntentBuilder {
         taskStackElements = mutableListOf<TaskStackElement>().apply(init)
     }
 
-    internal fun build(init: PendingIntentBuilder.() -> Unit): PendingIntent {
-        init()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun build() : PendingIntent {
         require(taskStackElements.isNotEmpty()) {
             buildMessage(
                 PendingIntentBuilder::class,
@@ -121,6 +122,11 @@ class PendingIntentBuilder {
             }
         }
     }
+
+    internal fun build(init: PendingIntentBuilder.() -> Unit): PendingIntent {
+        init()
+        return build()
+    }
 }
 
 class Intention private constructor(
@@ -141,20 +147,29 @@ class Intention private constructor(
             autoCancel = init() ?: return
         }
 
+        fun deleteIntent(builder: PendingIntentBuilder) {
+            deleteIntent = builder.build()
+        }
+
         fun deleteIntent(init: PendingIntentBuilder.() -> Unit) {
             deleteIntent = PendingIntentBuilder().build(init)
+        }
+
+        fun contentIntent(builder: PendingIntentBuilder) {
+            contentIntent = builder.build()
         }
 
         fun contentIntent(init: PendingIntentBuilder.() -> Unit) {
             contentIntent = PendingIntentBuilder().build(init)
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): Intention = Intention(autoCancel, deleteIntent, contentIntent)
+
         internal fun build(init: Builder.() -> Unit): Intention {
             init()
             return build()
         }
-
-        internal fun build(): Intention = Intention(autoCancel, deleteIntent, contentIntent)
     }
 }
 

@@ -6,6 +6,8 @@ import android.net.Uri
 import android.graphics.Color
 import android.media.AudioAttributes
 
+import androidx.annotation.RestrictTo
+
 import ua.makovskyi.notificator.dsl.NotificationMarker
 
 /**
@@ -77,16 +79,17 @@ class Alarm private constructor(
             ledLight = init()
         }
 
-        fun capturePolicy(init: () -> CapturePolicy) {
-            capturePolicy = init()
+        fun capturePolicy(init: () -> CapturePolicy?) {
+            capturePolicy = init() ?: return
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): Alarm = Alarm(sound, vibrate, ledLight, capturePolicy)
 
         internal fun build(init: Builder.() -> Unit): Alarm {
             init()
             return build()
         }
-
-        internal fun build(): Alarm = Alarm(sound, vibrate, ledLight, capturePolicy)
     }
 }
 

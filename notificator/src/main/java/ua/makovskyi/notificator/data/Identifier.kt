@@ -1,5 +1,7 @@
 package ua.makovskyi.notificator.data
 
+import androidx.annotation.RestrictTo
+
 import ua.makovskyi.notificator.dsl.NotificationMarker
 
 /**
@@ -23,20 +25,21 @@ class Identifier private constructor(
             id = init() ?: return
         }
 
-        fun sortKey(init: () -> String) {
+        fun sortKey(init: () -> String?) {
             sortKey = init()
         }
 
-        fun groupKey(init: () -> String) {
+        fun groupKey(init: () -> String?) {
             groupKey = init()
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): Identifier = Identifier(id, sortKey, groupKey)
 
         internal fun build(init: Builder.() -> Unit): Identifier {
             init()
             return build()
         }
-
-        internal fun build(): Identifier = Identifier(id, sortKey, groupKey)
     }
 }
 

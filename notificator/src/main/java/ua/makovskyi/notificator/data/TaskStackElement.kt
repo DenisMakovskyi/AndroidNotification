@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 
+import androidx.annotation.RestrictTo
+
 import ua.makovskyi.notificator.dsl.IntentMarker
 import ua.makovskyi.notificator.dsl.TaskStackMarker
 import ua.makovskyi.notificator.utils.buildMessage
@@ -13,8 +15,14 @@ import ua.makovskyi.notificator.utils.safe
  * @author Denis Makovskyi
  */
 
+enum class ConstructFrom {
+    ACTION,
+    COMPONENT_NAME
+}
+
 @IntentMarker
 class IntentBuilder(
+    private var from: ConstructFrom = ConstructFrom.COMPONENT_NAME,
     private var context: Context? = null,
     private var targetClass: Class<*>? = null,
     private var intentAction: String? = null,
@@ -23,19 +31,23 @@ class IntentBuilder(
     private var intentCategories: List<String>? = null
 ) {
 
-    fun context(init: () -> Context) {
+    fun from(init: () -> ConstructFrom) {
+        from = init()
+    }
+
+    fun context(init: () -> Context?) {
         context = init()
     }
 
-    fun targetClass(init: () -> Class<*>) {
+    fun targetClass(init: () -> Class<*>?) {
         targetClass = init()
     }
 
-    fun intentAction(init: () -> String) {
+    fun intentAction(init: () -> String?) {
         intentAction = init()
     }
 
-    fun intentExtras(init: () -> Bundle) {
+    fun intentExtras(init: () -> Bundle?) {
         intentExtras = init()
     }
 
@@ -47,26 +59,35 @@ class IntentBuilder(
         intentCategories = mutableListOf<String>().apply(init)
     }
 
-    internal fun build(init: IntentBuilder.() -> Unit): Intent {
-        init()
-        return build()
-    }
-
-    internal fun build(): Intent {
-        val ctx = requireNotNull(context) {
-            buildMessage(
-                IntentBuilder::class,
-                "Can not create intent from empty package context")
-        }
-        val cls = requireNotNull(targetClass) {
-            buildMessage(
-                IntentBuilder::class,
-                "Can not create intent from empty target class")
-        }
-        return Intent(ctx, cls).also { intent ->
-            this@IntentBuilder.intentAction.safe { action ->
-                intent.action = action
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun build(): Intent {
+        return when(from) {
+            ConstructFrom.ACTION -> {
+                requireNotNull(intentAction) {
+                    buildMessage(
+                        IntentBuilder::class,
+                        "Can not create intent from empty action")
+                }
+                Intent(intentAction)
             }
+            ConstructFrom.COMPONENT_NAME -> {
+                requireNotNull(context) {
+                    buildMessage(
+                        IntentBuilder::class,
+                        "Can not create intent from empty package context")
+                }
+                requireNotNull(targetClass) {
+                    buildMessage(
+                        IntentBuilder::class,
+                        "Can not create intent from empty target class")
+                }
+                Intent(context, targetClass).also { intent ->
+                    this@IntentBuilder.intentAction.safe { action ->
+                        intent.action = action
+                    }
+                }
+            }
+        }.also { intent ->
             this@IntentBuilder.intentExtras.safe { bundle ->
                 intent.putExtras(bundle)
             }
@@ -81,6 +102,11 @@ class IntentBuilder(
                 }
             }
         }
+    }
+
+    internal fun build(init: IntentBuilder.() -> Unit): Intent {
+        init()
+        return build()
     }
 }
 
@@ -102,20 +128,25 @@ class TaskStackElement private constructor(
         private var intent: Intent? = null
     ) {
 
-        fun howPut(init: () -> HowPut) {
-            howPut = init()
+        fun howPut(init: () -> HowPut?) {
+            howPut = init() ?: return
+        }
+
+        fun intent(builder: IntentBuilder) {
+            intent = builder.build()
         }
 
         fun intent(init: IntentBuilder.() -> Unit) {
             intent = IntentBuilder().build(init)
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): TaskStackElement = TaskStackElement(howPut, intent)
+
         internal fun build(init: Builder.() -> Unit): TaskStackElement {
             init()
             return build()
         }
-
-        internal fun build(): TaskStackElement = TaskStackElement(howPut, intent)
     }
 }
 

@@ -1,5 +1,7 @@
 package ua.makovskyi.notificator.data
 
+import androidx.annotation.RestrictTo
+
 import ua.makovskyi.notificator.dsl.NotificationMarker
 
 /**
@@ -37,12 +39,13 @@ class Content private constructor(
             message = init()
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun build(): Content = Content(time, info, title, message)
+
         internal fun build(init: Builder.() -> Unit): Content {
             init()
             return build()
         }
-
-        internal fun build(): Content = Content(time, info, title, message)
     }
 }
 
