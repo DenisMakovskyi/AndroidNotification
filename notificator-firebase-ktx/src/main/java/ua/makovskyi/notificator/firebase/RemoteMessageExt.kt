@@ -36,6 +36,23 @@ fun RemoteMessage.ofLEDLight(): LEDLight? {
         offMs = lightSettings[2])
 }
 
+fun RemoteMessage.ofSmallIcon(context: Context): Int? {
+    val iconResName = notification?.icon ?: return null
+    return context.resources.getIdentifier(iconResName, "int", context.packageName)
+}
+
+fun RemoteMessage.ofTime(): Long? {
+    return notification?.eventTime
+}
+
+fun RemoteMessage.ofTitle(): String? {
+    return notification?.title
+}
+
+fun RemoteMessage.ofMessage(): String? {
+    return notification?.body
+}
+
 fun RemoteMessage.ofImportance(): Importance? {
     val importance = notification?.notificationPriority ?: return null
 
@@ -50,27 +67,6 @@ fun RemoteMessage.ofImportance(): Importance? {
 
 fun RemoteMessage.ofChannelInfo(): ChannelInfo.Builder? {
     return notification?.channelId?.let { ChannelInfo.Builder(channelId = it) }
-}
-
-fun RemoteMessage.ofTitle(): String? {
-    return notification?.title
-}
-
-fun RemoteMessage.ofBody(): String? {
-    return notification?.body
-}
-
-fun RemoteMessage.ofTime(): Long? {
-    return notification?.eventTime
-}
-
-fun RemoteMessage.ofSmallIcon(context: Context): Int? {
-    val iconResName = notification?.icon ?: return null
-    return context.resources.getIdentifier(iconResName, "int", context.packageName)
-}
-
-fun RemoteMessage.ofId(): Int? {
-    return notification?.tag?.hashCode()
 }
 
 fun RemoteMessage.ofAutoCancel(): Boolean? {
@@ -97,6 +93,10 @@ fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilder? {
     }
 }
 
+fun RemoteMessage.ofId(): Int? {
+    return notification?.tag?.hashCode()
+}
+
 fun RemoteMessage.wrap(applicationContext: Context): Notification {
     return notification {
         alarm {
@@ -108,13 +108,13 @@ fun RemoteMessage.wrap(applicationContext: Context): Notification {
             smallIcon { ofSmallIcon(applicationContext) }
         }
         content {
-            info { ofBody() }
             time { ofTime() }
             title { ofTitle() }
+            message { ofMessage() }
         }
         channel {
-            channelInfo { ofChannelInfo() }
             importance { ofImportance() }
+            channelInfo { ofChannelInfo() }
         }
         val contentIntentBuilder = ofContentIntent(applicationContext)
         if (contentIntentBuilder != null) {

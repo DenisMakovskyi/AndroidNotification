@@ -3,8 +3,6 @@ package ua.makovskyi.notificator.firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-import ua.makovskyi.notificator.Notificator
-
 /**
  * Created by azazellj on 1/11/20.
  */
@@ -12,7 +10,7 @@ import ua.makovskyi.notificator.Notificator
 class AutoNotificationService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
-        Notificator.showNotification(this, message.wrap(applicationContext))
+        message.wrap(applicationContext).show(this)
     }
 
     override fun onNewToken(newToken: String) {
