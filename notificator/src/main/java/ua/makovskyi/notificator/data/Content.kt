@@ -21,19 +21,19 @@ class Content private constructor(
         private var message: String? = null
     ) {
 
-        fun time(init: () -> Long) {
+        fun time(init: () -> Long?) {
             time = init()
         }
 
-        fun info(init: () -> String) {
+        fun info(init: () -> String?) {
             info = init()
         }
 
-        fun title(init: () -> String) {
+        fun title(init: () -> String?) {
             title = init()
         }
 
-        fun message(init: () -> String) {
+        fun message(init: () -> String?) {
             message = init()
         }
 

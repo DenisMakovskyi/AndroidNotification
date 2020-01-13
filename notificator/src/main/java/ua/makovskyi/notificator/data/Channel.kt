@@ -142,8 +142,8 @@ class Channel private constructor(
         private var groupingParams: GroupingParams? = null
     ) {
 
-        fun importance(init: () -> Importance) {
-            importance = init()
+        fun importance(init: () -> Importance?) {
+            importance = init() ?: return
         }
 
         fun channelInfo(init: ChannelInfo.Builder.() -> Unit) {

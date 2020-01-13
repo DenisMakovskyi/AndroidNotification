@@ -1,2 +1,4 @@
-include ':app', ':notificator'
+include ':app'
+include ':notificator'
+include ':notificator-firebase-ktx'
 rootProject.name='AndroidNotification'

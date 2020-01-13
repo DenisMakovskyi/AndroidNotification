@@ -1,12 +1,10 @@
 package ua.makovskyi.notificator.data
 
 import android.graphics.Bitmap
-
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import androidx.core.app.NotificationCompat.BadgeIconType
 import androidx.core.app.NotificationCompat.BADGE_ICON_NONE
-
+import androidx.core.app.NotificationCompat.BadgeIconType
 import ua.makovskyi.notificator.dsl.NotificationMarker
 
 /**
@@ -35,8 +33,8 @@ class Icons private constructor(
             badgeType = init()
         }
 
-        fun smallIcon(init: () -> Int) {
-            smallIcon = init()
+        fun smallIcon(init: () -> Int?) {
+            smallIcon = init() ?: return
         }
 
         fun smallTint(init: () -> Int) {
