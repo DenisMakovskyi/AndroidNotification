@@ -4,7 +4,9 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+
 import com.google.firebase.messaging.RemoteMessage
+
 import ua.makovskyi.notificator.data.*
 import ua.makovskyi.notificator.utils.toBundle
 
@@ -41,27 +43,30 @@ fun RemoteMessage.ofSmallIcon(context: Context): Int {
     return context.resources.getIdentifier(iconResName, "int", context.packageName)
 }
 
-fun iconFromMetaData(context: Context): Int {
-    val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-
-    val iconRes = info.metaData.getInt("com.google.firebase.messaging.default_notification_icon")
-    val appIcon = info.icon
-
-    if (iconRes != 0) return iconRes
-
-    return appIcon
-}
-
 fun RemoteMessage.ofTime(): Long? {
     return notification?.eventTime
 }
 
-fun RemoteMessage.ofTitle(): String? {
-    return notification?.title
+fun RemoteMessage.ofTitle(context: Context): String? {
+    val titleLocKey = notification?.titleLocalizationKey
+
+    if (titleLocKey.isNullOrEmpty()) return notification?.title
+
+    return stringFromResources(context, titleLocKey).also { title ->
+        val titleLocArgs = notification?.titleLocalizationArgs
+        if (!titleLocArgs.isNullOrEmpty()) String.format(title, titleLocArgs)
+    }
 }
 
-fun RemoteMessage.ofMessage(): String? {
-    return notification?.body
+fun RemoteMessage.ofMessage(context: Context): String? {
+    val bodyLocKey = notification?.bodyLocalizationKey
+
+    if (bodyLocKey.isNullOrEmpty()) return notification?.body
+
+    return stringFromResources(context, bodyLocKey).also { body ->
+        val bodyLocArgs = notification?.bodyLocalizationArgs
+        if (!bodyLocArgs.isNullOrEmpty()) String.format(body, bodyLocArgs)
+    }
 }
 
 fun RemoteMessage.ofImportance(): Importance? {
@@ -120,8 +125,8 @@ fun RemoteMessage.wrap(applicationContext: Context): Notification {
         }
         content {
             time { ofTime() }
-            title { ofTitle() }
-            message { ofMessage() }
+            title { ofTitle(applicationContext) }
+            message { ofMessage(applicationContext) }
         }
         channel {
             importance { ofImportance() }
@@ -138,4 +143,18 @@ fun RemoteMessage.wrap(applicationContext: Context): Notification {
             id { ofId() }
         }
     }
+}
+
+private fun iconFromMetaData(context: Context): Int {
+    val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+
+    val iconRes = info.metaData.getInt("com.google.firebase.messaging.default_notification_icon")
+    val appIcon = info.icon
+
+    return if (iconRes != 0) iconRes else appIcon
+}
+
+private fun stringFromResources(context: Context, key: String): String {
+    val resId = context.resources.getIdentifier(key, "string", context.packageName)
+    return context.getString(resId)
 }

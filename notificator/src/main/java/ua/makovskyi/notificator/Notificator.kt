@@ -43,29 +43,62 @@ object Notificator {
                 if (icons.smallTint > 0) {
                     color = ContextCompat.getColor(context, icons.smallTint)
                 }
-                icons.largeIcon.safe { icon ->
-                    setLargeIcon(icon)
-                }
             }
             // - content
             notification.content.time.safe { time ->
                 setWhen(time)
                 setShowWhen(true)
             }
-            val textStyle = NotificationCompat.BigTextStyle()
-            notification.content.info.safe { info ->
-                setContentInfo(info)
-                textStyle.setSummaryText(info)
+            setContentInfo(notification.content.info)
+            setContentTitle(notification.content.title)
+            setContentText(notification.content.message)
+            notification.content.largeIcon.safe { icon ->
+                setLargeIcon(icon)
             }
-            notification.content.title.safe { title ->
-                setContentTitle(title)
-                textStyle.setBigContentTitle(title)
+            // - content style
+            val style = when(notification.content.contentStyle) {
+                is ContentStyle.TextStyle -> {
+                    NotificationCompat.BigTextStyle().also { textStyle ->
+                        when(notification.content.contentStyle.behaviour) {
+                            StyleBehaviour.IGNORE -> {
+                                textStyle.setSummaryText(notification.content.info)
+                                textStyle.setBigContentTitle(notification.content.title)
+                                textStyle.bigText(notification.content.message)
+                            }
+                            StyleBehaviour.OVERRIDE -> {
+                                textStyle.setSummaryText(notification.content.contentStyle.info)
+                                textStyle.setBigContentTitle(notification.content.contentStyle.title)
+                                textStyle.bigText(notification.content.contentStyle.message)
+                            }
+                        }
+                    }
+                }
+                is ContentStyle.ImageStyle -> {
+                    NotificationCompat.BigPictureStyle().also { pictureStyle ->
+                        notification.content.contentStyle.bigPicture.safe { picture ->
+                            pictureStyle.bigPicture(picture)
+                        }
+                        when(notification.content.contentStyle.behaviour) {
+                            StyleBehaviour.IGNORE -> {
+                                pictureStyle.setSummaryText(notification.content.info)
+                                pictureStyle.setBigContentTitle(notification.content.title)
+                                notification.content.largeIcon.safe { icon ->
+                                    pictureStyle.bigLargeIcon(icon)
+                                }
+                            }
+                            StyleBehaviour.OVERRIDE -> {
+                                pictureStyle.setSummaryText(notification.content.contentStyle.info)
+                                pictureStyle.setBigContentTitle(notification.content.contentStyle.title)
+                                notification.content.contentStyle.largeIcon.safe { icon ->
+                                    pictureStyle.bigLargeIcon(icon)
+                                }
+                            }
+                        }
+                    }
+                }
+                is ContentStyle.NOTHING -> null
             }
-            notification.content.message.safe { message ->
-                setContentText(message)
-                textStyle.bigText(message)
-            }
-            setStyle(textStyle)
+            if (style != null) setStyle(style)
             // - intention
             setAutoCancel(notification.intention.autoCancel)
             notification.intention.deleteIntent.safe { intent ->
@@ -87,22 +120,22 @@ object Notificator {
 
         }.only { builder ->
             NotificationManagerCompat.from(context).apply {
-                    // - channel and channel group
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        // - channel
-                        if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
-                            createNotificationChannel(createChannel(notification.channel, notification.alarm))
-                        }
-                        // - group
-                        notification.channel.groupingParams.safe { groupingParams ->
-                            if (groupingParams.groupId != null && getNotificationChannelGroup(groupingParams.groupId) == null) {
-                                createChannelGroup(groupingParams).safe { group ->
-                                    createNotificationChannelGroup(group)
-                                }
+                // - channel and channel group
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    // - channel
+                    if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
+                        createNotificationChannel(createChannel(notification.channel, notification.alarm))
+                    }
+                    // - group
+                    notification.channel.groupingParams.safe { groupingParams ->
+                        if (groupingParams.groupId != null && getNotificationChannelGroup(groupingParams.groupId) == null) {
+                            createChannelGroup(groupingParams).safe { group ->
+                                createNotificationChannelGroup(group)
                             }
                         }
                     }
                 }
+            }
                 .safe { manager ->
                     manager.notify(notification.identifier.id, builder.build())
                 }

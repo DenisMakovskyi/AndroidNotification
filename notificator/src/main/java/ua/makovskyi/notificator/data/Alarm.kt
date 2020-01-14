@@ -46,7 +46,7 @@ enum class CapturePolicy(val policy: Int) {
  *
  * Includes sound, vibration, LED indicator settings and notification audio capture policy.
  *
- * @param sound - notification sound [Uri].* You can use [ua.makovskyi.notificator.utils.defaultNotificationSound]
+ * @param sound - notification sound [Uri]. You can use [ua.makovskyi.notificator.utils.defaultNotificationSound]
  * to obtain device default sound for notifications.
  * @param vibrate - vibration pattern. Example: longArrayOf(500L, 500L, 500L, 500L).
  * @param ledLight - device LED indicator parameters.

@@ -17,9 +17,7 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
 class Icons private constructor(
     internal val badgeType: Int,
     internal val smallIcon: Int,
-    internal val smallTint: Int,
-    internal val largeIcon: Bitmap?
-) {
+    internal val smallTint: Int) {
 
     @NotificationMarker
     class Builder(
@@ -28,8 +26,7 @@ class Icons private constructor(
         @DrawableRes
         private var smallIcon: Int = 0,
         @ColorRes
-        private var smallTint: Int = 0,
-        private var largeIcon: Bitmap? = null
+        private var smallTint: Int = 0
     ) {
 
         fun badgeType(init: () -> Int?) {
@@ -44,12 +41,8 @@ class Icons private constructor(
             smallTint = init() ?: return
         }
 
-        fun largeIcon(init: () -> Bitmap?) {
-            largeIcon = init()
-        }
-
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Icons = Icons(badgeType, smallIcon, smallTint, largeIcon)
+        fun build(): Icons = Icons(badgeType, smallIcon, smallTint)
 
         internal fun build(init: Builder.() -> Unit): Icons {
             init()
