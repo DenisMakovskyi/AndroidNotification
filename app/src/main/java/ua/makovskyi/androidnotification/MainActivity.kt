@@ -12,10 +12,10 @@ import ua.makovskyi.notificator.utils.defaultNotificationSound
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var alarm: Alarm
-    lateinit var icons: Icons
-    lateinit var channel: Channel
-    lateinit var intention: Intention
+    private lateinit var alarm: Alarm
+    private lateinit var icons: Icons
+    private lateinit var channel: Channel
+    private lateinit var intention: Intention
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +42,25 @@ class MainActivity : AppCompatActivity() {
         channel = notificationChannel {
             importance { Importance.MAXIMAL }
             channelInfo {
-                channelId { "${applicationContext.packageName}.default_notification_channel"}
+                channelId { "${applicationContext.packageName}.default_notification_channel" }
                 channelName { "Default channel" }
                 channelDescription { "Default notification channel" }
             }
         }
         intention = notificationIntention {
             autoCancel { true }
+            contentIntent {
+                targetIntent { From.ACTIVITY }
+                packageContext { applicationContext }
+                taskStackElements(
+                    taskStackElement {
+                        intent {
+                            from { ConstructFrom.ACTION }
+                            intentAction { "FIREBASE_MESSAGE" }
+                        }
+                    }
+                )
+            }
         }
     }
 

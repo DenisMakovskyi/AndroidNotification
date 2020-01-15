@@ -2,6 +2,7 @@ package ua.makovskyi.notificator.data
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 
 import androidx.annotation.RestrictTo
@@ -25,6 +26,7 @@ class IntentBuilder(
     private var from: ConstructFrom = ConstructFrom.COMPONENT_NAME,
     private var context: Context? = null,
     private var targetClass: Class<*>? = null,
+    private var intentData: Uri? = null,
     private var intentAction: String? = null,
     private var intentExtras: Bundle? = null,
     private var intentBehaviour: List<Int>? = null,
@@ -43,6 +45,10 @@ class IntentBuilder(
         targetClass = init()
     }
 
+    fun intentData(init: () -> Uri?) {
+        intentData = init()
+    }
+
     fun intentAction(init: () -> String?) {
         intentAction = init()
     }
@@ -51,12 +57,12 @@ class IntentBuilder(
         intentExtras = init()
     }
 
-    fun intentBehaviour(init: (MutableList<Int>) -> Unit) {
-        intentBehaviour = mutableListOf<Int>().apply(init)
+    fun intentBehaviour(vararg flags: Int) {
+        intentBehaviour = flags.toList()
     }
 
-    fun intentCategories(init: (MutableList<String>) -> Unit) {
-        intentCategories = mutableListOf<String>().apply(init)
+    fun intentCategories(vararg categories: String) {
+        intentCategories = categories.toList()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -88,6 +94,9 @@ class IntentBuilder(
                 }
             }
         }.also { intent ->
+            this@IntentBuilder.intentData.safe { data ->
+                intent.data = data
+            }
             this@IntentBuilder.intentExtras.safe { bundle ->
                 intent.putExtras(bundle)
             }

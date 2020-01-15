@@ -54,8 +54,8 @@ class PendingIntentBuilder {
         packageContext = init()
     }
 
-    fun taskStackElements(init: (MutableList<TaskStackElement>) -> Unit) {
-        taskStackElements = mutableListOf<TaskStackElement>().apply(init)
+    fun taskStackElements(vararg elements: TaskStackElement) {
+        taskStackElements = elements.toList()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

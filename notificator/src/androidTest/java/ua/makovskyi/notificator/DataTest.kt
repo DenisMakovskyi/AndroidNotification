@@ -8,8 +8,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.*
 
-import ua.makovskyi.notificator.data.LEDLight
-import ua.makovskyi.notificator.data.notificationAlarm
+import ua.makovskyi.notificator.data.*
 import ua.makovskyi.notificator.utils.defaultNotificationSound
 
 @RunWith(AndroidJUnit4::class)

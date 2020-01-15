@@ -95,19 +95,18 @@ fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilder? {
     return PendingIntentBuilder().also { builder ->
         builder.targetIntent { From.ACTIVITY }
         builder.packageContext { context }
-        builder.taskStackElements {
-            listOf(
-                taskStackElement {
-                    intent {
-                        from { ConstructFrom.ACTION }
-                        intentAction { clickAction }
-                        intentExtras { if (data.isNotEmpty()) data.toBundle() else null }
-                    }
+        builder.taskStackElements(
+            taskStackElement {
+                intent {
+                    from { ConstructFrom.ACTION }
+                    intentAction { clickAction }
+                    intentExtras { if (data.isNotEmpty()) data.toBundle() else null }
                 }
-            )
-        }
+            }
+        )
     }
 }
+
 
 fun RemoteMessage.ofId(): Int? {
     return notification?.tag?.hashCode()
