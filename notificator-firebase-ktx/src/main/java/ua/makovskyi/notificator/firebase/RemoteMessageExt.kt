@@ -1,31 +1,75 @@
 package ua.makovskyi.notificator.firebase
 
+import kotlinx.coroutines.runBlocking
+
 import android.app.NotificationManager
 import android.content.Context
-import android.content.pm.PackageManager
 import android.net.Uri
+
+import coil.Coil
+import coil.api.get
 
 import com.google.firebase.messaging.RemoteMessage
 
 import ua.makovskyi.notificator.data.*
 import ua.makovskyi.notificator.utils.toBundle
 
-
 /**
  * Created by azazellj on 1/11/20.
  */
 
-fun RemoteMessage.ofSound(): Uri? {
+fun RemoteMessage.wrap(applicationContext: Context): Notification {
+    return notification {
+        alarm {
+            ofSound()?.let { sound { it } }
+            ofVibrate()?.let { vibrate { it } }
+            ofLEDLight()?.let { ledLight { it } }
+        }
+        icons {
+            smallIcon { ofSmallIcon(applicationContext) }
+        }
+        content {
+            ofTime()?.let { time { it } }
+            ofTitle(applicationContext)?.let { title { it } }
+            ofMessage(applicationContext)?.let { message { it } }
+            ofPicture()?.let {
+                withImageStyle {
+                    behaviour { StyleBehaviour.IGNORE }
+                    bigPicture {
+                        runBlocking {
+                            drawableToBitmap(Coil.get(it))
+                        }
+                    }
+                }
+            }
+        }
+        channel {
+            importance { ofImportance() }
+            channelInfo {
+                ofChannelId()?.let { channelId { it } }
+            }
+        }
+        intention {
+            autoCancel { ofAutoCancel() }
+            ofContentIntent(applicationContext)?.let { contentIntent(it) }
+        }
+        identifier {
+            id { ofId() }
+        }
+    }
+}
+
+private fun RemoteMessage.ofSound(): Uri? {
     if (notification?.defaultSound == true) return null
     return notification?.sound?.let { Uri.parse(it) }
 }
 
-fun RemoteMessage.ofVibrateTimings(): LongArray? {
+private fun RemoteMessage.ofVibrate(): LongArray? {
     if (notification?.defaultVibrateSettings == true) return null
     return notification?.vibrateTimings
 }
 
-fun RemoteMessage.ofLEDLight(): LEDLight? {
+private fun RemoteMessage.ofLEDLight(): LEDLight? {
     val notification = notification ?: return null
 
     if (notification.defaultLightSettings) return null
@@ -38,16 +82,16 @@ fun RemoteMessage.ofLEDLight(): LEDLight? {
         offMs = lightSettings[2])
 }
 
-fun RemoteMessage.ofSmallIcon(context: Context): Int {
+private fun RemoteMessage.ofSmallIcon(context: Context): Int {
     val iconResName = notification?.icon ?: return iconFromMetaData(context)
-    return context.resources.getIdentifier(iconResName, "int", context.packageName)
+    return iconFromResources(context, iconResName)
 }
 
-fun RemoteMessage.ofTime(): Long? {
+private fun RemoteMessage.ofTime(): Long? {
     return notification?.eventTime
 }
 
-fun RemoteMessage.ofTitle(context: Context): String? {
+private fun RemoteMessage.ofTitle(context: Context): String? {
     val titleLocKey = notification?.titleLocalizationKey
 
     if (titleLocKey.isNullOrEmpty()) return notification?.title
@@ -58,7 +102,7 @@ fun RemoteMessage.ofTitle(context: Context): String? {
     }
 }
 
-fun RemoteMessage.ofMessage(context: Context): String? {
+private fun RemoteMessage.ofMessage(context: Context): String? {
     val bodyLocKey = notification?.bodyLocalizationKey
 
     if (bodyLocKey.isNullOrEmpty()) return notification?.body
@@ -69,10 +113,12 @@ fun RemoteMessage.ofMessage(context: Context): String? {
     }
 }
 
-fun RemoteMessage.ofImportance(): Importance? {
-    val importance = notification?.notificationPriority ?: return null
+private fun RemoteMessage.ofPicture(): String? {
+    return notification?.imageUrl?.toString()
+}
 
-    return when(importance) {
+private fun RemoteMessage.ofImportance(): Importance {
+    return when(notification?.notificationPriority) {
         NotificationManager.IMPORTANCE_LOW -> Importance.LOW
         NotificationManager.IMPORTANCE_MIN -> Importance.MIN
         NotificationManager.IMPORTANCE_HIGH -> Importance.HIGHT
@@ -81,15 +127,15 @@ fun RemoteMessage.ofImportance(): Importance? {
     }
 }
 
-fun RemoteMessage.ofChannelInfo(): ChannelInfo.Builder? {
-    return notification?.channelId?.let { ChannelInfo.Builder(channelId = it) }
+private fun RemoteMessage.ofChannelId(): String? {
+    return notification?.channelId
 }
 
-fun RemoteMessage.ofAutoCancel(): Boolean? {
-    return notification?.sticky
+private fun RemoteMessage.ofAutoCancel(): Boolean {
+    return notification?.sticky ?: true
 }
 
-fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilder? {
+private fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilder? {
     val clickAction = notification?.clickAction ?: return null
 
     return PendingIntentBuilder().also { builder ->
@@ -97,6 +143,7 @@ fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilder? {
         builder.packageContext { context }
         builder.taskStackElements(
             taskStackElement {
+                howPut { HowPut.ONLY_NEXT_INTENT }
                 intent {
                     from { ConstructFrom.ACTION }
                     intentAction { clickAction }
@@ -108,52 +155,6 @@ fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilder? {
 }
 
 
-fun RemoteMessage.ofId(): Int? {
-    return notification?.tag?.hashCode()
-}
-
-fun RemoteMessage.wrap(applicationContext: Context): Notification {
-    return notification {
-        alarm {
-            sound { ofSound() }
-            vibrate { ofVibrateTimings() }
-            ledLight { ofLEDLight() }
-        }
-        icons {
-            smallIcon { ofSmallIcon(applicationContext) }
-        }
-        content {
-            time { ofTime() }
-            title { ofTitle(applicationContext) }
-            message { ofMessage(applicationContext) }
-        }
-        channel {
-            importance { ofImportance() }
-            channelInfo { ofChannelInfo() }
-        }
-        val contentIntentBuilder = ofContentIntent(applicationContext)
-        if (contentIntentBuilder != null) {
-            intention {
-                autoCancel { ofAutoCancel() }
-                contentIntent(contentIntentBuilder)
-            }
-        }
-        identifier {
-            id { ofId() }
-        }
-    }
-}
-
-private fun iconFromMetaData(context: Context): Int {
-    val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-
-    val iconRes = info.metaData.getInt("com.google.firebase.messaging.default_notification_icon")
-    val appIcon = info.icon
-
-    return if (iconRes != 0) iconRes else appIcon
-}
-
-private fun stringFromResources(context: Context, key: String): String {
-    val resId = context.resources.getIdentifier(key, "string", context.packageName)
-    return context.getString(resId)
+private fun RemoteMessage.ofId(): Int {
+    return notification?.tag?.hashCode() ?: randomId()
 }
