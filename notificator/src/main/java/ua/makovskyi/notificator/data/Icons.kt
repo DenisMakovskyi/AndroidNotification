@@ -1,7 +1,5 @@
 package ua.makovskyi.notificator.data
 
-import android.graphics.Bitmap
-
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo

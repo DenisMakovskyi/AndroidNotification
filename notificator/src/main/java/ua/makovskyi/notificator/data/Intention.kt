@@ -8,6 +8,7 @@ import androidx.core.app.TaskStackBuilder
 
 import ua.makovskyi.notificator.dsl.NotificationMarker
 import ua.makovskyi.notificator.dsl.PendingIntentMarker
+import ua.makovskyi.notificator.dsl.SemanticMarker
 import ua.makovskyi.notificator.dsl.TaskStackMarker
 import ua.makovskyi.notificator.utils.buildMessage
 import ua.makovskyi.notificator.utils.fromFirst
@@ -24,6 +25,7 @@ enum class From {
     BROADCAST
 }
 
+@SemanticMarker
 @TaskStackMarker
 @PendingIntentMarker
 class PendingIntentBuilder {
@@ -38,9 +40,8 @@ class PendingIntentBuilder {
         requestCode = init() ?: return
     }
 
-    fun pendingFlags(init: (MutableList<Int>) -> Unit) {
-        pendingFlags = mutableListOf<Int>()
-            .apply(init)
+    fun pendingFlags(vararg flags: Int) {
+        pendingFlags = flags.toList()
             .reduce { acc, flag ->
                 acc or flag
             }
@@ -59,7 +60,7 @@ class PendingIntentBuilder {
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun build() : PendingIntent {
+    fun build(): PendingIntent {
         require(taskStackElements.isNotEmpty()) {
             buildMessage(
                 PendingIntentBuilder::class,

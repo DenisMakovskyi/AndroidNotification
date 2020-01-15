@@ -22,16 +22,16 @@ enum class ConstructFrom {
 }
 
 @IntentMarker
-class IntentBuilder(
-    private var from: ConstructFrom = ConstructFrom.COMPONENT_NAME,
-    private var context: Context? = null,
-    private var targetClass: Class<*>? = null,
-    private var intentData: Uri? = null,
-    private var intentAction: String? = null,
-    private var intentExtras: Bundle? = null,
-    private var intentBehaviour: List<Int>? = null,
+class IntentBuilder {
+
+    private var from: ConstructFrom = ConstructFrom.COMPONENT_NAME
+    private var context: Context? = null
+    private var targetClass: Class<*>? = null
+    private var intentData: Uri? = null
+    private var intentAction: String? = null
+    private var intentExtras: Bundle? = null
+    private var intentBehaviour: List<Int>? = null
     private var intentCategories: List<String>? = null
-) {
 
     fun from(init: () -> ConstructFrom) {
         from = init()

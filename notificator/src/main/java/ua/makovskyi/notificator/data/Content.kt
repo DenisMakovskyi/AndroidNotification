@@ -1,11 +1,14 @@
 package ua.makovskyi.notificator.data
 
+import android.app.PendingIntent
 import android.graphics.Bitmap
 
 import androidx.annotation.RestrictTo
+import androidx.core.app.NotificationCompat
 
 import ua.makovskyi.notificator.dsl.ContentMarker
 import ua.makovskyi.notificator.dsl.NotificationMarker
+import ua.makovskyi.notificator.dsl.SemanticMarker
 
 /**
  * @author Denis Makovskyi
@@ -69,7 +72,7 @@ sealed class ContentStyle(internal val behaviour: StyleBehaviour) {
         internal val info: String?,
         internal val title: String?,
         internal val largeIcon: Bitmap?,
-        internal var bigPicture: Bitmap? = null
+        internal var bigPicture: Bitmap?
     ): ContentStyle(behaviour) {
 
         @ContentMarker
@@ -106,13 +109,49 @@ sealed class ContentStyle(internal val behaviour: StyleBehaviour) {
     }
 }
 
+@ContentMarker
+@SemanticMarker
+class SemanticActionBuilder {
+
+    private var icon: Int = 0
+    private var title: String? = null
+    private var pendingIntent: PendingIntent? = null
+
+    fun icon(init: () -> Int) {
+        icon = init()
+    }
+
+    fun title(init: () -> String?) {
+        title = init()
+    }
+
+    fun pendingIntent(builder: PendingIntentBuilder) {
+        pendingIntent = builder.build()
+    }
+
+    fun pendingIntent(init: PendingIntentBuilder.() -> Unit) {
+        pendingIntent = PendingIntentBuilder().build(init)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun build(): NotificationCompat.Action = NotificationCompat.Action(icon, title, pendingIntent)
+
+    internal fun build(init: SemanticActionBuilder.() -> Unit): NotificationCompat.Action {
+        init()
+        return build()
+    }
+}
+
+fun semanticAction(init: SemanticActionBuilder.() -> Unit): NotificationCompat.Action = SemanticActionBuilder().build(init)
+
 class Content private constructor(
     internal val time: Long?,
     internal val info: String?,
     internal val title: String?,
     internal val message: String?,
     internal val largeIcon: Bitmap?,
-    internal val contentStyle: ContentStyle
+    internal val contentStyle: ContentStyle,
+    internal val semanticActions: List<NotificationCompat.Action>
 ) {
 
     @ContentMarker
@@ -123,7 +162,8 @@ class Content private constructor(
         private var title: String? = null,
         private var message: String? = null,
         private var largeIcon: Bitmap? = null,
-        private var contentStyle: ContentStyle = ContentStyle.NOTHING
+        private var contentStyle: ContentStyle = ContentStyle.NOTHING,
+        private var semanticActions: List<NotificationCompat.Action> = listOf()
     ) {
 
         fun time(init: () -> Long?) {
@@ -162,8 +202,12 @@ class Content private constructor(
             contentStyle = ContentStyle.ImageStyle.Builder().build(init)
         }
 
+        fun semanticActions(vararg actions: NotificationCompat.Action) {
+            semanticActions = actions.toList()
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Content = Content(time, info, title, message, largeIcon, contentStyle)
+        fun build(): Content = Content(time, info, title, message, largeIcon, contentStyle, semanticActions)
 
         internal fun build(init: Builder.() -> Unit): Content {
             init()

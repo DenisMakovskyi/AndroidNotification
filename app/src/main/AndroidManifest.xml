@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".firebase.AutoNotificationService" />
+        <service android:name="ua.makovskyi.notificator.firebase.AutoNotificationService" />
 
     </application>
 

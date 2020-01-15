@@ -99,6 +99,10 @@ object Notificator {
                 is ContentStyle.NOTHING -> null
             }
             if (style != null) setStyle(style)
+            // - actions
+            for (action in notification.content.semanticActions) {
+                addAction(action)
+            }
             // - intention
             setAutoCancel(notification.intention.autoCancel)
             notification.intention.deleteIntent.safe { intent ->

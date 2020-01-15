@@ -1,5 +1,7 @@
 package ua.makovskyi.androidnotification
 
+import android.app.PendingIntent
+import android.content.Intent
 import kotlinx.android.synthetic.main.activity_main.*
 
 import android.os.Bundle
@@ -79,6 +81,27 @@ class MainActivity : AppCompatActivity() {
                     title { "Big text title" }
                     message { "Notification with very very long expandable message which will be displayed in BigTextStyle." }
                 }
+                semanticActions(
+                    semanticAction {
+                        title { "Click me" }
+                        pendingIntent {
+                            pendingFlags(PendingIntent.FLAG_ONE_SHOT)
+                            targetIntent { From.ACTIVITY }
+                            packageContext { applicationContext }
+                            taskStackElements(
+                                taskStackElement {
+                                    howPut { HowPut.ONLY_NEXT_INTENT }
+                                    intent {
+                                        from { ConstructFrom.COMPONENT_NAME }
+                                        context { applicationContext }
+                                        targetClass { MainActivity::class.java }
+                                        intentBehaviour(Intent.FLAG_ACTIVITY_CLEAR_TOP and Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                )
             }
             channel = this@MainActivity.channel
             intention = this@MainActivity.intention
