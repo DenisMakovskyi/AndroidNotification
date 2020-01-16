@@ -1,9 +1,11 @@
 package ua.makovskyi.androidnotification
 
-import android.app.PendingIntent
-import android.content.Intent
+import java.util.concurrent.TimeUnit
+
 import kotlinx.android.synthetic.main.activity_main.*
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
 
 import androidx.appcompat.app.AppCompatActivity
@@ -71,9 +73,10 @@ class MainActivity : AppCompatActivity() {
             alarm = this@MainActivity.alarm
             icons = this@MainActivity.icons
             content {
+                time { System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1) }
                 info { "Text info" }
                 title { "Text title" }
-                message { "Notification with very very long expandable message which will be displayed in BigTextStyle." }
+                message { "Notification with expandable message." }
                 largeIcon { bitmapFromResources(applicationContext, R.drawable.pic_android_large) }
                 withTextStyle {
                     behaviour { StyleBehaviour.OVERRIDE }
@@ -84,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 semanticActions(
                     semanticAction {
                         title { "Click me" }
-                        pendingIntent {
+                        actionIntent {
                             pendingFlags(PendingIntent.FLAG_ONE_SHOT)
                             targetIntent { From.ACTIVITY }
                             packageContext { applicationContext }
@@ -119,7 +122,7 @@ class MainActivity : AppCompatActivity() {
             content {
                 info { "Image info" }
                 title { "Image title" }
-                message { "Notification with very very long expandable message which will be displayed in BigPictureStyle." }
+                message { "Notification with picture." }
                 largeIcon { bitmapFromResources(applicationContext, R.drawable.pic_android_large) }
                 withImageStyle {
                     behaviour { StyleBehaviour.OVERRIDE }
