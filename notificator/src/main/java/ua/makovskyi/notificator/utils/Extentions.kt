@@ -16,15 +16,9 @@ import androidx.annotation.RestrictTo
  */
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun String?.isTitleMaxLengthExceeded(): Boolean {
+fun String?.isTextMaxLengthExceeded(): Boolean {
     if (this == null) return false
-    return this.length > 30
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun String?.isPlainTextMaxLengthExceeded(): Boolean {
-    if (this == null) return false
-    return this.length > 65
+    return this.length >= 30
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

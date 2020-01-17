@@ -115,12 +115,6 @@ class PendingIntentBuilder {
                             "Can not create pending intent from empty intent"))
                 }
             }
-            else -> {
-                throw IllegalArgumentException(
-                    buildMessage(
-                        PendingIntentBuilder::class,
-                        "Can not create pending intent from undefined target"))
-            }
         }
     }
 

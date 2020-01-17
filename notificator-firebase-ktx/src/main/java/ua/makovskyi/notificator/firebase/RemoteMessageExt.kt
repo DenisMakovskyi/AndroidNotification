@@ -13,8 +13,7 @@ import com.google.firebase.messaging.RemoteMessage
 
 import ua.makovskyi.notificator.data.*
 import ua.makovskyi.notificator.utils.defaultNotificationSound
-import ua.makovskyi.notificator.utils.isPlainTextMaxLengthExceeded
-import ua.makovskyi.notificator.utils.isTitleMaxLengthExceeded
+import ua.makovskyi.notificator.utils.isTextMaxLengthExceeded
 import ua.makovskyi.notificator.utils.toBundle
 
 /**
@@ -60,8 +59,8 @@ fun RemoteMessage.wrap(
                 }
 
             } else {
-                val isTitleLengthExceeded = title.isTitleMaxLengthExceeded()
-                if (isTitleLengthExceeded || plainText.isPlainTextMaxLengthExceeded()) {
+                val isTitleLengthExceeded = title.isTextMaxLengthExceeded()
+                if (isTitleLengthExceeded || plainText.isTextMaxLengthExceeded()) {
                     withTextStyle {
                         title { title }
                         bigText { plainText }
