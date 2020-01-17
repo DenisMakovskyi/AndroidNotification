@@ -4,8 +4,6 @@ import java.util.concurrent.TimeUnit
 
 import kotlinx.android.synthetic.main.activity_main.*
 
-import android.app.PendingIntent
-import android.content.Intent
 import android.os.Bundle
 
 import androidx.appcompat.app.AppCompatActivity
@@ -76,35 +74,14 @@ class MainActivity : AppCompatActivity() {
                 time { System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1) }
                 info { "Text info" }
                 title { "Text title" }
-                message { "Notification with expandable message." }
+                plainText { "Collapsed message." }
                 largeIcon { bitmapFromResources(applicationContext, R.drawable.pic_android_large) }
                 withTextStyle {
                     behaviour { StyleBehaviour.OVERRIDE }
-                    info { "Big text info" }
-                    title { "Big text title" }
-                    message { "Notification with very very long expandable message which will be displayed in BigTextStyle." }
+                    title { "Expanded text title" }
+                    bigText { "Notification with very very long expandable message which will be displayed in BigTextStyle." }
+                    summary { "Expanded summary" }
                 }
-                semanticActions(
-                    semanticAction {
-                        title { "Click me" }
-                        actionIntent {
-                            pendingFlags(PendingIntent.FLAG_ONE_SHOT)
-                            targetIntent { From.ACTIVITY }
-                            packageContext { applicationContext }
-                            taskStackElements(
-                                taskStackElement {
-                                    howPut { HowPut.ONLY_NEXT_INTENT }
-                                    intent {
-                                        from { ConstructFrom.COMPONENT_NAME }
-                                        context { applicationContext }
-                                        targetClass { MainActivity::class.java }
-                                        intentBehaviour(Intent.FLAG_ACTIVITY_CLEAR_TOP and Intent.FLAG_ACTIVITY_NEW_TASK)
-                                    }
-                                }
-                            )
-                        }
-                    }
-                )
             }
             channel = this@MainActivity.channel
             intention = this@MainActivity.intention
@@ -122,13 +99,13 @@ class MainActivity : AppCompatActivity() {
             content {
                 info { "Image info" }
                 title { "Image title" }
-                message { "Notification with picture." }
+                plainText { "Notification with picture." }
                 largeIcon { bitmapFromResources(applicationContext, R.drawable.pic_android_large) }
                 withImageStyle {
-                    behaviour { StyleBehaviour.OVERRIDE }
-                    info { "Big image info" }
-                    title { "Big image title" }
-                    largeIcon { bitmapFromResources(applicationContext, R.drawable.pic_android_large) }
+                    behaviour { StyleBehaviour.IGNORE }
+                    //title { "Expanded image title" }
+                    summary { "Expanded image summary" }
+                    //largeIcon { bitmapFromResources(applicationContext, R.drawable.pic_android_large) }
                     bigPicture { bitmapFromResources(applicationContext, R.drawable.pic_android_big) }
                 }
             }

@@ -12,32 +12,62 @@ import coil.api.get
 import com.google.firebase.messaging.RemoteMessage
 
 import ua.makovskyi.notificator.data.*
+import ua.makovskyi.notificator.utils.defaultNotificationSound
+import ua.makovskyi.notificator.utils.isPlainTextMaxLengthExceeded
+import ua.makovskyi.notificator.utils.isTitleMaxLengthExceeded
 import ua.makovskyi.notificator.utils.toBundle
 
 /**
  * Created by azazellj on 1/11/20.
  */
 
-fun RemoteMessage.wrap(applicationContext: Context): Notification {
+fun RemoteMessage.wrap(
+    applicationContext: Context,
+    intentionClosure: (() -> Intention)? = null
+): Notification {
     return notification {
         alarm {
-            ofSound()?.let { sound { it } }
-            ofVibrate()?.let { vibrate { it } }
-            ofLEDLight()?.let { ledLight { it } }
+            sound { ofSound() }
+            vibrate { ofVibrate() }
+            ledLight { ofLEDLight() }
         }
         icons {
             smallIcon { ofSmallIcon(applicationContext) }
         }
         content {
-            ofTime()?.let { time { it } }
-            ofTitle(applicationContext)?.let { title { it } }
-            ofMessage(applicationContext)?.let { message { it } }
-            ofPicture()?.let {
+            time { ofTime() }
+            // Receive title and plain text here, this variables will be needed later.
+            val title = ofTitle(applicationContext)
+            val plainText = ofPlainText(applicationContext)
+            title { title }
+            plainText { plainText }
+            // Trying to select optimal notification style if it is needed.
+            // If notification contains image url, ImageStyle is using, otherwise,
+            // checking whether title or plain text length is not exceed maximal available text length for notification,
+            // then TextStyle is using, in order to keep title and text in single line.
+            val imageUrl = ofImage()
+            if (imageUrl != null) {
+                val bitmap = runBlocking {
+                    drawableToBitmap(Coil.get(imageUrl))
+                }
+                largeIcon { bitmap }
                 withImageStyle {
                     behaviour { StyleBehaviour.IGNORE }
-                    bigPicture {
-                        runBlocking {
-                            drawableToBitmap(Coil.get(it))
+                    summary { plainText }
+                    bigPicture { bitmap }
+                }
+
+            } else {
+                val isTitleLengthExceeded = title.isTitleMaxLengthExceeded()
+                if (isTitleLengthExceeded || plainText.isPlainTextMaxLengthExceeded()) {
+                    withTextStyle {
+                        title { title }
+                        bigText { plainText }
+                        // Trying to select optimal behaviour.
+                        // If title max available length for notification was exceeded -
+                        // style will override title when notification will expand.
+                        behaviour {
+                            if (isTitleLengthExceeded) StyleBehaviour.OVERRIDE else StyleBehaviour.IGNORE
                         }
                     }
                 }
@@ -46,12 +76,18 @@ fun RemoteMessage.wrap(applicationContext: Context): Notification {
         channel {
             importance { ofImportance() }
             channelInfo {
-                ofChannelId()?.let { channelId { it } }
+                channelId { ofChannelId() }
             }
         }
-        intention {
-            autoCancel { ofAutoCancel() }
-            ofContentIntent(applicationContext)?.let { contentIntent(it) }
+        if (intentionClosure != null) {
+            intention = intentionClosure()
+        } else {
+            intention {
+                autoCancel { ofAutoCancel() }
+                ofContentIntent(applicationContext)?.let {
+                    contentIntent(it)
+                }
+            }
         }
         identifier {
             id { ofId() }
@@ -59,9 +95,9 @@ fun RemoteMessage.wrap(applicationContext: Context): Notification {
     }
 }
 
-private fun RemoteMessage.ofSound(): Uri? {
-    if (notification?.defaultSound == true) return null
-    return notification?.sound?.let { Uri.parse(it) }
+private fun RemoteMessage.ofSound(): Uri {
+    if (notification?.defaultSound == true) return defaultNotificationSound()
+    return notification?.sound?.let { Uri.parse(it) } ?: defaultNotificationSound()
 }
 
 private fun RemoteMessage.ofVibrate(): LongArray? {
@@ -102,7 +138,7 @@ private fun RemoteMessage.ofTitle(context: Context): String? {
     }
 }
 
-private fun RemoteMessage.ofMessage(context: Context): String? {
+private fun RemoteMessage.ofPlainText(context: Context): String? {
     val bodyLocKey = notification?.bodyLocalizationKey
 
     if (bodyLocKey.isNullOrEmpty()) return notification?.body
@@ -113,7 +149,7 @@ private fun RemoteMessage.ofMessage(context: Context): String? {
     }
 }
 
-private fun RemoteMessage.ofPicture(): String? {
+private fun RemoteMessage.ofImage(): String? {
     return notification?.imageUrl?.toString()
 }
 
@@ -127,8 +163,8 @@ private fun RemoteMessage.ofImportance(): Importance {
     }
 }
 
-private fun RemoteMessage.ofChannelId(): String? {
-    return notification?.channelId
+private fun RemoteMessage.ofChannelId(): String {
+    return notification?.channelId ?: "CHANNEL_GENERAL"
 }
 
 private fun RemoteMessage.ofAutoCancel(): Boolean {

@@ -137,8 +137,8 @@ class TaskStackElement private constructor(
         private var intent: Intent? = null
     ) {
 
-        fun howPut(init: () -> HowPut?) {
-            howPut = init() ?: return
+        fun howPut(init: () -> HowPut) {
+            howPut = init()
         }
 
         fun intent(builder: IntentBuilder) {

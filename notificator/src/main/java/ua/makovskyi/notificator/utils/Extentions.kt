@@ -16,6 +16,18 @@ import androidx.annotation.RestrictTo
  */
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun String?.isTitleMaxLengthExceeded(): Boolean {
+    if (this == null) return false
+    return this.length > 30
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun String?.isPlainTextMaxLengthExceeded(): Boolean {
+    if (this == null) return false
+    return this.length > 65
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun <V> Map<String, V?>.toBundle(): Bundle {
     val bundle = Bundle(size)
     for (entry in this) {

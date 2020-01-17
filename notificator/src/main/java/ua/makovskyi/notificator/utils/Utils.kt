@@ -15,7 +15,6 @@ import androidx.annotation.RestrictTo
  * @author Denis Makovskyi
  */
 
-
 fun bitmapFromResources(context: Context, @DrawableRes id: Int): Bitmap? {
     return BitmapFactory.decodeResource(context.resources, id)
 }

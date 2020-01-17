@@ -14,14 +14,6 @@ import ua.makovskyi.notificator.dsl.SemanticMarker
  * @author Denis Makovskyi
  */
 
-/**
- * Notification style behaviour.
- *
- * Determines whether the notification content will be taken from [Content] as default or from [ContentStyle].
- *
- * @property IGNORE - will be taken from content.
- * @property OVERRIDE - will be taken from style.
- */
 enum class StyleBehaviour {
     IGNORE,
     OVERRIDE
@@ -36,56 +28,38 @@ open class DefaultStyleBuilder {
     }
 }
 
-/**
- * Notification style.
- *
- * May be implemented as a [TextStyle] or [ImageStyle].
- *
- * @param behaviour - notification style behaviour. Default field for all [ContentStyle] descendants. [StyleBehaviour.IGNORE] by default.
- */
-sealed class ContentStyle(internal val behaviour: StyleBehaviour) {
+sealed class ContentStyle(private val behaviour: StyleBehaviour) {
 
-    /**
-     * Stub. Using as a default implementation in [Content.contentStyle].
-     */
     object NOTHING: ContentStyle(StyleBehaviour.IGNORE)
 
-    /**
-     * Notification style for large(expandable) text displaying.
-     *
-     * @param info - hint after application name. If [ContentStyle.behaviour] is [StyleBehaviour.OVERRIDE] for this style,
-     * even in collapsed notification, info will be taken from [TextStyle.info] not from a [Content.info].
-     * @param title - first line, shows when notification expanded and replace [Content.title].
-     * @param message - second line, shows completely (if long) when notification expanded. If [ContentStyle.behaviour] is [StyleBehaviour.OVERRIDE] for this style,
-     * even in collapsed notification, message will be taken from [TextStyle.message] not from a [Content.message].
-     */
     class TextStyle(
         behaviour: StyleBehaviour,
-        internal val info: String?,
         internal val title: String?,
-        internal val message: String?
+        internal val bigText: String?,
+        internal val summary: String?
     ): ContentStyle(behaviour) {
 
         @ContentMarker
         class Builder: DefaultStyleBuilder() {
-            private var info: String? = null
-            private var title: String? = null
-            private var message: String? = null
 
-            fun info(init: () -> String?) {
-                info = init()
-            }
+            private var title: String? = null
+            private var bigText: String? = null
+            private var summary: String? = null
 
             fun title(init: () -> String?) {
                 title = init()
             }
 
-            fun message(init: () -> String?) {
-                message = init()
+            fun bigText(init: () -> String?) {
+                bigText = init()
+            }
+
+            fun summary(init: () -> String?) {
+                summary = init()
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun build(): TextStyle = TextStyle(behaviour, info, title, message)
+            fun build(): TextStyle = TextStyle(behaviour, title, bigText, summary)
 
             internal fun build(init: Builder.() -> Unit): TextStyle {
                 init()
@@ -94,35 +68,27 @@ sealed class ContentStyle(internal val behaviour: StyleBehaviour) {
         }
     }
 
-    /**
-     * Notification style for icon and image displaying.
-     *
-     * @param info - text hint. When notification collapsed - info is hidden, otherwise, when expanded - shows below [title].
-     * @param title - first line, shows when notification expanded and replace [Content.title].
-     * @param largeIcon - icon near right border of notification.
-     * @param bigPicture - big picture below the main content, shows when notification expanded and replaces [Content.message].
-     */
     class ImageStyle(
         behaviour: StyleBehaviour,
-        internal val info: String?,
         internal val title: String?,
+        internal val summary: String?,
         internal val largeIcon: Bitmap?,
         internal var bigPicture: Bitmap?
     ): ContentStyle(behaviour) {
 
         @ContentMarker
         class Builder: DefaultStyleBuilder() {
-            private var info: String? = null
             private var title: String? = null
+            private var summary: String? = null
             private var largeIcon: Bitmap? = null
             private var bigPicture: Bitmap? = null
 
-            fun info(init: () -> String?) {
-                info = init()
-            }
-
             fun title(init: () -> String?) {
                 title = init()
+            }
+
+            fun summary(init: () -> String?) {
+                summary = init()
             }
 
             fun largeIcon(init: () -> Bitmap?) {
@@ -134,7 +100,7 @@ sealed class ContentStyle(internal val behaviour: StyleBehaviour) {
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun build(): ImageStyle = ImageStyle(behaviour, info, title, largeIcon, bigPicture)
+            fun build(): ImageStyle = ImageStyle(behaviour, title, summary, largeIcon, bigPicture)
 
             internal fun build(init: Builder.() -> Unit): ImageStyle {
                 init()
@@ -142,16 +108,12 @@ sealed class ContentStyle(internal val behaviour: StyleBehaviour) {
             }
         }
     }
+
+    internal fun ignore(): Boolean = behaviour == StyleBehaviour.IGNORE
+
+    internal fun override(): Boolean = behaviour == StyleBehaviour.OVERRIDE
 }
 
-/**
- * Builder for [NotificationCompat.Action] item.
- *
- * @property icon - small icon representing the action.
- * @property title - title of the action.
- * @property actionIntent - intent to send when the user invokes this action. May be null, in which case the action
- * may be rendered in a disabled presentation.
- */
 @ContentMarker
 @SemanticMarker
 class SemanticActionBuilder {
@@ -191,7 +153,7 @@ class Content private constructor(
     internal val time: Long?,
     internal val info: String?,
     internal val title: String?,
-    internal val message: String?,
+    internal val plainText: String?,
     internal val largeIcon: Bitmap?,
     internal val contentStyle: ContentStyle,
     internal val semanticActions: List<NotificationCompat.Action>
@@ -221,7 +183,7 @@ class Content private constructor(
             title = init()
         }
 
-        fun message(init: () -> String?) {
+        fun plainText(init: () -> String?) {
             message = init()
         }
 

@@ -51,12 +51,12 @@ class ChannelInfo private constructor(
         private var channelDescription: String? = null
     ) {
 
-        fun channelId(init: () -> String?) {
-            channelId = init() ?: return
+        fun channelId(init: () -> String) {
+            channelId = init()
         }
 
-        fun channelName(init: () -> String?) {
-            channelName = init() ?: return
+        fun channelName(init: () -> String) {
+            channelName = init()
         }
 
         fun channelDescription(init: () -> String?) {

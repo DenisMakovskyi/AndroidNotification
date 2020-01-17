@@ -27,16 +27,16 @@ class Icons private constructor(
         private var smallTint: Int = 0
     ) {
 
-        fun badgeType(init: () -> Int?) {
-            badgeType = init() ?: return
+        fun badgeType(init: () -> Int) {
+            badgeType = init()
         }
 
-        fun smallIcon(init: () -> Int?) {
-            smallIcon = init() ?: return
+        fun smallIcon(init: () -> Int) {
+            smallIcon = init()
         }
 
-        fun smallTint(init: () -> Int?) {
-            smallTint = init() ?: return
+        fun smallTint(init: () -> Int) {
+            smallTint = init()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

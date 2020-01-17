@@ -21,8 +21,8 @@ class Identifier private constructor(
         private var groupKey: String? = null
     ) {
 
-        fun id(init: () -> Int?) {
-            id = init() ?: return
+        fun id(init: () -> Int) {
+            id = init()
         }
 
         fun sortKey(init: () -> String?) {

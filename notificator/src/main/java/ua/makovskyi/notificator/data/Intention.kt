@@ -32,12 +32,12 @@ class PendingIntentBuilder {
 
     private var requestCode: Int = 100
     private var pendingFlags: Int = PendingIntent.FLAG_UPDATE_CURRENT
-    private var targetIntent: From? = null
+    private var targetIntent: From = From.ACTIVITY
     private var packageContext: Context? = null
     private var taskStackElements: List<TaskStackElement> = listOf()
 
-    fun requestCode(init: () -> Int?) {
-        requestCode = init() ?: return
+    fun requestCode(init: () -> Int) {
+        requestCode = init()
     }
 
     fun pendingFlags(vararg flags: Int) {
@@ -47,7 +47,7 @@ class PendingIntentBuilder {
             }
     }
 
-    fun targetIntent(init: () -> From?) {
+    fun targetIntent(init: () -> From) {
         targetIntent = init()
     }
 
@@ -144,8 +144,8 @@ class Intention private constructor(
         private var contentIntent: PendingIntent? = null
     ) {
 
-        fun autoCancel(init: () -> Boolean?) {
-            autoCancel = init() ?: return
+        fun autoCancel(init: () -> Boolean) {
+            autoCancel = init()
         }
 
         fun deleteIntent(builder: PendingIntentBuilder) {

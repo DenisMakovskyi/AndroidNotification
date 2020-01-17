@@ -23,17 +23,13 @@ object Notificator {
     fun showNotification(context: Context, notification: Notification) {
         NotificationCompat.Builder(context, notification.channel.channelInfo.channelId).apply {
             // - alarm
-            notification.alarm.sound.safe { uri ->
-                setSound(uri)
-            }
-            notification.alarm.vibrate.safe { pattern ->
-                setVibrate(pattern)
-            }
+            setSound(notification.alarm.sound)
+            setVibrate(notification.alarm.vibrate)
             notification.alarm.ledLight.safe { led ->
                 setLights(led.argb, led.onMs, led.offMs)
             }
             // - icons
-            notification.icons.safe { icons ->
+            notification.icons.only { icons ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     setBadgeIconType(icons.badgeType)
                 }
@@ -51,48 +47,26 @@ object Notificator {
             }
             setContentInfo(notification.content.info)
             setContentTitle(notification.content.title)
-            setContentText(notification.content.message)
-            notification.content.largeIcon.safe { icon ->
-                setLargeIcon(icon)
-            }
+            setContentText(notification.content.plainText)
+            setLargeIcon(notification.content.largeIcon)
             // - content style
             val style = when(notification.content.contentStyle) {
                 is ContentStyle.TextStyle -> {
                     NotificationCompat.BigTextStyle().also { textStyle ->
-                        when(notification.content.contentStyle.behaviour) {
-                            StyleBehaviour.IGNORE -> {
-                                textStyle.setSummaryText(notification.content.info)
-                                textStyle.setBigContentTitle(notification.content.title)
-                                textStyle.bigText(notification.content.message)
-                            }
-                            StyleBehaviour.OVERRIDE -> {
-                                textStyle.setSummaryText(notification.content.contentStyle.info)
-                                textStyle.setBigContentTitle(notification.content.contentStyle.title)
-                                textStyle.bigText(notification.content.contentStyle.message)
-                            }
+                        textStyle.bigText(notification.content.contentStyle.bigText)
+                        textStyle.setSummaryText(notification.content.contentStyle.summary)
+                        if (notification.content.contentStyle.override()) {
+                            textStyle.setBigContentTitle(notification.content.contentStyle.title)
                         }
                     }
                 }
                 is ContentStyle.ImageStyle -> {
                     NotificationCompat.BigPictureStyle().also { pictureStyle ->
-                        notification.content.contentStyle.bigPicture.safe { picture ->
-                            pictureStyle.bigPicture(picture)
-                        }
-                        when(notification.content.contentStyle.behaviour) {
-                            StyleBehaviour.IGNORE -> {
-                                pictureStyle.setSummaryText(notification.content.info)
-                                pictureStyle.setBigContentTitle(notification.content.title)
-                                notification.content.largeIcon.safe { icon ->
-                                    pictureStyle.bigLargeIcon(icon)
-                                }
-                            }
-                            StyleBehaviour.OVERRIDE -> {
-                                pictureStyle.setSummaryText(notification.content.contentStyle.info)
-                                pictureStyle.setBigContentTitle(notification.content.contentStyle.title)
-                                notification.content.contentStyle.largeIcon.safe { icon ->
-                                    pictureStyle.bigLargeIcon(icon)
-                                }
-                            }
+                        pictureStyle.bigPicture(notification.content.contentStyle.bigPicture)
+                        pictureStyle.setSummaryText(notification.content.contentStyle.summary)
+                        if (notification.content.contentStyle.override()) {
+                            pictureStyle.bigLargeIcon(notification.content.contentStyle.largeIcon)
+                            pictureStyle.setBigContentTitle(notification.content.contentStyle.title)
                         }
                     }
                 }
@@ -105,12 +79,8 @@ object Notificator {
             }
             // - intention
             setAutoCancel(notification.intention.autoCancel)
-            notification.intention.deleteIntent.safe { intent ->
-                setDeleteIntent(intent)
-            }
-            notification.intention.contentIntent.safe { intent ->
-                setContentIntent(intent)
-            }
+            setDeleteIntent(notification.intention.deleteIntent)
+            setContentIntent(notification.intention.contentIntent)
             // - identifier
             notification.identifier.groupKey.safe { groupKey ->
                 setGroup(groupKey)
@@ -139,10 +109,9 @@ object Notificator {
                         }
                     }
                 }
+            }.safe { manager ->
+                manager.notify(notification.identifier.id, builder.build())
             }
-                .safe { manager ->
-                    manager.notify(notification.identifier.id, builder.build())
-                }
         }
     }
 

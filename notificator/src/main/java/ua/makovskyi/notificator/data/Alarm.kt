@@ -9,6 +9,7 @@ import android.media.AudioAttributes
 import androidx.annotation.RestrictTo
 
 import ua.makovskyi.notificator.dsl.NotificationMarker
+import ua.makovskyi.notificator.utils.defaultNotificationSound
 
 /**
  * @author Denis Makovskyi
@@ -61,7 +62,7 @@ class Alarm private constructor(
 
     @NotificationMarker
     class Builder(
-        private var sound: Uri? = null,
+        private var sound: Uri? = defaultNotificationSound(),
         private var vibrate: LongArray? = null,
         private var ledLight: LEDLight? = null,
         private var capturePolicy: CapturePolicy = CapturePolicy.ALLOW_BY_ALL
@@ -79,8 +80,8 @@ class Alarm private constructor(
             ledLight = init()
         }
 
-        fun capturePolicy(init: () -> CapturePolicy?) {
-            capturePolicy = init() ?: return
+        fun capturePolicy(init: () -> CapturePolicy) {
+            capturePolicy = init()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
