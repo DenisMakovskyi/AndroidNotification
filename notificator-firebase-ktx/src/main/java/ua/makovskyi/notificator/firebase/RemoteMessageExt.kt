@@ -23,7 +23,7 @@ import ua.makovskyi.notificator.utils.toBundle
 
 fun RemoteMessage.wrap(
     applicationContext: Context,
-    intentionClosure: (() -> Intention)? = null
+    intentionClosure: () -> Intention?
 ): Notification {
     return notification {
         alarm {
@@ -52,8 +52,10 @@ fun RemoteMessage.wrap(
                 }
                 largeIcon { bitmap }
                 withImageStyle {
-                    behaviour { StyleBehaviour.IGNORE }
+                    behaviour { StyleBehaviour.OVERRIDE }
+                    title { title }
                     summary { plainText }
+                    largeIcon { null }
                     bigPicture { bitmap }
                 }
 
@@ -79,8 +81,9 @@ fun RemoteMessage.wrap(
                 channelId { ofChannelId() }
             }
         }
-        if (intentionClosure != null) {
-            intention = intentionClosure()
+        val closureIntention = intentionClosure()
+        if (closureIntention != null) {
+            intention = closureIntention
         } else {
             intention {
                 autoCancel { ofAutoCancel() }

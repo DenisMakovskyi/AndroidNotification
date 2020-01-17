@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "24354288691",
+    "firebase_url": "https://fir-test-2fa05.firebaseio.com",
+    "project_id": "fir-test-2fa05",
+    "storage_bucket": "fir-test-2fa05.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24354288691:android:cfaf6bfed460003fbe5f46",
+        "android_client_info": {
+          "package_name": "ua.makovskyi.androidnotification"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "24354288691-p8q9cmg6llkhse66ueolahsva4i2tgrv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALdfkNxbH4TnaSLT_fw7bnkXDcSx67Unw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "24354288691-p8q9cmg6llkhse66ueolahsva4i2tgrv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

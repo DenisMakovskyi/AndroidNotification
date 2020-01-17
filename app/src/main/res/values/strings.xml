@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AndroidNotification</string>
+    <string name="notification_channel_id" translatable="false">CHANNEL_GENERAL</string>
 </resources>
