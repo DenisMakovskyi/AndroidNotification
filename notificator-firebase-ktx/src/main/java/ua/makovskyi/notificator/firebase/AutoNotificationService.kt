@@ -2,6 +2,7 @@ package ua.makovskyi.notificator.firebase
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+
 import ua.makovskyi.notificator.data.Intention
 
 /**
@@ -15,8 +16,8 @@ open class AutoNotificationService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        message.wrap(applicationContext) { onBuildIntention(message) }.show(this)
+        message.wrap(applicationContext) { onManualIntention(message) }.show(this)
     }
 
-    open fun onBuildIntention(message: RemoteMessage): Intention? = null
+    open fun onManualIntention(message: RemoteMessage): Intention? = null
 }

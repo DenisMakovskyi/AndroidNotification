@@ -3,6 +3,7 @@ package ua.makovskyi.notificator.data
 import android.app.PendingIntent
 import android.graphics.Bitmap
 
+import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import androidx.core.app.NotificationCompat
 
@@ -150,6 +151,7 @@ class SemanticActionBuilder {
 fun semanticAction(init: SemanticActionBuilder.() -> Unit): NotificationCompat.Action = SemanticActionBuilder().build(init)
 
 class Content private constructor(
+    internal val color: Int,
     internal val time: Long?,
     internal val info: String?,
     internal val title: String?,
@@ -162,6 +164,8 @@ class Content private constructor(
     @ContentMarker
     @NotificationMarker
     class Builder(
+        @ColorInt
+        private var color: Int = 0,
         private var time: Long? = null,
         private var info: String? = null,
         private var title: String? = null,
@@ -170,6 +174,10 @@ class Content private constructor(
         private var contentStyle: ContentStyle = ContentStyle.NOTHING,
         private var semanticActions: List<NotificationCompat.Action> = listOf()
     ) {
+
+        fun color(init: () -> Int) {
+            color = init()
+        }
 
         fun time(init: () -> Long?) {
             time = init()
@@ -212,7 +220,7 @@ class Content private constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Content = Content(time, info, title, message, largeIcon, contentStyle, semanticActions)
+        fun build(): Content = Content(color, time, info, title, message, largeIcon, contentStyle, semanticActions)
 
         internal fun build(init: Builder.() -> Unit): Content {
             init()

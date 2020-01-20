@@ -33,14 +33,18 @@ object Notificator {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     setBadgeIconType(icons.badgeType)
                 }
-                if (icons.smallIcon > 0) {
+                if (icons.smallIcon != 0) {
                     setSmallIcon(icons.smallIcon)
                 }
-                if (icons.smallTint > 0) {
+                if (icons.smallTint != 0) {
                     color = ContextCompat.getColor(context, icons.smallTint)
                 }
             }
             // - content
+            if (notification.content.color != 0) {
+                color = notification.content.color
+                setColorized(true)
+            }
             notification.content.time.safe { time ->
                 setWhen(time)
                 setShowWhen(true)

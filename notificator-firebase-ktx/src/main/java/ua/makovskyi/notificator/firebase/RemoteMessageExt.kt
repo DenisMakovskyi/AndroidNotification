@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
 import android.net.Uri
 
 import coil.Coil
@@ -21,7 +22,7 @@ import ua.makovskyi.notificator.utils.toBundle
  */
 
 fun RemoteMessage.wrap(
-    applicationContext: Context,
+    appContext: Context,
     intentionClosure: () -> Intention?
 ): Notification {
     return notification {
@@ -31,19 +32,21 @@ fun RemoteMessage.wrap(
             ledLight { ofLEDLight() }
         }
         icons {
-            smallIcon { ofSmallIcon(applicationContext) }
+            smallIcon { ofSmallIcon(appContext) }
+            smallTint { colorFromMetaData(appContext) }
         }
         content {
+            color { ofColor() }
             time { ofTime() }
             // Receive title and plain text here, this variables will be needed later.
-            val title = ofTitle(applicationContext)
-            val plainText = ofPlainText(applicationContext)
+            val title = ofTitle(appContext)
+            val plainText = ofPlainText(appContext)
             title { title }
             plainText { plainText }
             // Trying to select optimal notification style if it is needed.
             // If notification contains image url, ImageStyle is using, otherwise,
             // checking whether title or plain text length is not exceed maximal available text length for notification,
-            // then TextStyle is using, in order to keep title and text in single line.
+            // then TextStyle is using, in order to keep title and text completely visible for user.
             val imageUrl = ofImage()
             if (imageUrl != null) {
                 val bitmap = runBlocking {
@@ -80,13 +83,13 @@ fun RemoteMessage.wrap(
                 channelId { ofChannelId() }
             }
         }
-        val closureIntention = intentionClosure()
-        if (closureIntention != null) {
-            intention = closureIntention
+        val manualIntention = intentionClosure()
+        if (manualIntention != null) {
+            intention = manualIntention
         } else {
             intention {
                 autoCancel { ofAutoCancel() }
-                ofContentIntent(applicationContext)?.let {
+                ofContentIntent(appContext)?.let {
                     contentIntent(it)
                 }
             }
@@ -123,6 +126,11 @@ private fun RemoteMessage.ofLEDLight(): LEDLight? {
 private fun RemoteMessage.ofSmallIcon(context: Context): Int {
     val iconResName = notification?.icon ?: return iconFromMetaData(context)
     return iconFromResources(context, iconResName)
+}
+
+private fun RemoteMessage.ofColor(): Int {
+    val colorArgb = notification?.color
+    return if (colorArgb != null) Color.parseColor(colorArgb) else 0
 }
 
 private fun RemoteMessage.ofTime(): Long? {

@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 
 /**
@@ -24,6 +25,12 @@ internal fun iconFromMetaData(context: Context): Int {
     val appIcon = info.icon
 
     return if (iconRes != 0) iconRes else appIcon
+}
+
+@ColorRes
+internal fun colorFromMetaData(context: Context): Int {
+    val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+    return info.metaData.getInt("com.google.firebase.messaging.default_notification_color")
 }
 
 @DrawableRes
