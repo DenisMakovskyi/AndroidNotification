@@ -18,7 +18,7 @@ import ua.makovskyi.notificator.utils.isTextMaxLengthExceeded
 import ua.makovskyi.notificator.utils.toBundle
 
 /**
- * Created by azazellj on 1/11/20.
+ * Created by azazellj, Denis Makovskyi.
  */
 
 fun RemoteMessage.wrap(

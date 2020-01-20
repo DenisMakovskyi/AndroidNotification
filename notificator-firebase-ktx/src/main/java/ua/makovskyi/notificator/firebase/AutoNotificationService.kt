@@ -6,7 +6,7 @@ import com.google.firebase.messaging.RemoteMessage
 import ua.makovskyi.notificator.data.Intention
 
 /**
- * Created by azazellj on 1/11/20.
+ * Created by azazellj, Denis Makovskyi.
  */
 
 open class AutoNotificationService : FirebaseMessagingService() {
