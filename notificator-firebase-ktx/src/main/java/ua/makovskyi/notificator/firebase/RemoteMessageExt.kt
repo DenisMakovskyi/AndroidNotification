@@ -129,8 +129,8 @@ private fun RemoteMessage.ofSmallIcon(context: Context): Int {
 }
 
 private fun RemoteMessage.ofColor(): Int {
-    val colorArgb = notification?.color
-    return if (colorArgb != null) Color.parseColor(colorArgb) else 0
+    val colorHex = notification?.color
+    return if (colorHex != null) Color.parseColor(colorHex) else 0
 }
 
 private fun RemoteMessage.ofTime(): Long? {
