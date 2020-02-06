@@ -30,8 +30,12 @@ class IntentBuilder {
     private var intentData: Uri? = null
     private var intentAction: String? = null
     private var intentExtras: Bundle? = null
-    private var intentBehaviour: List<Int>? = null
-    private var intentCategories: List<String>? = null
+    private var intentBehaviour: MutableList<Int> = mutableListOf()
+    private var intentCategories: MutableList<String> = mutableListOf()
+
+    operator fun String.unaryPlus() {
+        intentCategories.add(this)
+    }
 
     fun from(init: () -> ConstructFrom) {
         from = init()
@@ -57,12 +61,36 @@ class IntentBuilder {
         intentExtras = init()
     }
 
-    fun intentBehaviour(vararg flags: Int) {
-        intentBehaviour = flags.toList()
+    fun intentBehaviour(init: () -> Int) {
+        intentBehaviour.add(init())
     }
 
+    @Deprecated(
+        "Use DSL-style function instead",
+        ReplaceWith(
+            "intentBehaviour(init: () -> Int)",
+            "ua.makovskyi.notificator.data"
+        ),
+        DeprecationLevel.WARNING
+    )
+    fun intentBehaviour(vararg flags: Int) {
+        intentBehaviour = flags.toMutableList()
+    }
+
+    fun intentCategory(init: () -> String) {
+        +init()
+    }
+
+    @Deprecated(
+        "Use DSL-style function instead",
+        ReplaceWith(
+            "intentCategory(init: () -> String)",
+            "ua.makovskyi.notificator.data"
+        ),
+        DeprecationLevel.WARNING
+    )
     fun intentCategories(vararg categories: String) {
-        intentCategories = categories.toList()
+        intentCategories = categories.toMutableList()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -94,21 +122,17 @@ class IntentBuilder {
                 }
             }
         }.also { intent ->
-            this@IntentBuilder.intentData.safe { data ->
+            intentData.safe { data ->
                 intent.data = data
             }
-            this@IntentBuilder.intentExtras.safe { bundle ->
+            intentExtras.safe { bundle ->
                 intent.putExtras(bundle)
             }
-            this@IntentBuilder.intentBehaviour.safe { flags ->
-                for (flag in flags) {
-                    intent.addFlags(flag)
-                }
+            for (flag in intentBehaviour) {
+                intent.addFlags(flag)
             }
-            this@IntentBuilder.intentCategories.safe { categories ->
-                for (category in categories) {
-                    intent.addCategory(category)
-                }
+            for (category in intentCategories) {
+                intent.addCategory(category)
             }
         }
     }
@@ -126,8 +150,8 @@ enum class HowPut {
 }
 
 class TaskStackElement private constructor(
-    internal val howPut: HowPut?,
-    internal val intent: Intent?
+    val howPut: HowPut?,
+    val intent: Intent?
 ) {
 
     @IntentMarker

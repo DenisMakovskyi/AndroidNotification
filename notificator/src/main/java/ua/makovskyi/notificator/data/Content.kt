@@ -22,26 +22,26 @@ enum class StyleBehaviour {
 
 open class DefaultStyleBuilder {
 
-    protected var behaviour: StyleBehaviour = StyleBehaviour.IGNORE
+    protected var behaviour = StyleBehaviour.IGNORE
 
-    fun behaviour(init: () -> StyleBehaviour?) {
-        behaviour = init() ?: return
+    fun behaviour(init: () -> StyleBehaviour) {
+        behaviour = init()
     }
 }
 
 sealed class ContentStyle(private val behaviour: StyleBehaviour) {
 
-    object NOTHING: ContentStyle(StyleBehaviour.IGNORE)
+    object NOTHING : ContentStyle(StyleBehaviour.IGNORE)
 
     class TextStyle(
         behaviour: StyleBehaviour,
-        internal val title: String?,
-        internal val bigText: String?,
-        internal val summary: String?
-    ): ContentStyle(behaviour) {
+        val title: String?,
+        val bigText: String?,
+        val summary: String?
+    ) : ContentStyle(behaviour) {
 
         @ContentMarker
-        class Builder: DefaultStyleBuilder() {
+        class Builder : DefaultStyleBuilder() {
 
             private var title: String? = null
             private var bigText: String? = null
@@ -71,14 +71,14 @@ sealed class ContentStyle(private val behaviour: StyleBehaviour) {
 
     class ImageStyle(
         behaviour: StyleBehaviour,
-        internal val title: String?,
-        internal val summary: String?,
-        internal val largeIcon: Bitmap?,
-        internal var bigPicture: Bitmap?
-    ): ContentStyle(behaviour) {
+        val title: String?,
+        val summary: String?,
+        val largeIcon: Bitmap?,
+        var bigPicture: Bitmap?
+    ) : ContentStyle(behaviour) {
 
         @ContentMarker
-        class Builder: DefaultStyleBuilder() {
+        class Builder : DefaultStyleBuilder() {
             private var title: String? = null
             private var summary: String? = null
             private var largeIcon: Bitmap? = null
@@ -148,17 +148,25 @@ class SemanticActionBuilder {
     }
 }
 
+@Deprecated(
+    "Use DSL-style function instead",
+    ReplaceWith(
+        "Content::semanticAction(init: SemanticActionBuilder.() -> Unit)",
+        "ua.makovskyi.notificator.data"
+    ),
+    DeprecationLevel.WARNING
+)
 fun semanticAction(init: SemanticActionBuilder.() -> Unit): NotificationCompat.Action = SemanticActionBuilder().build(init)
 
-class Content private constructor(
-    internal val color: Int,
-    internal val time: Long?,
-    internal val info: String?,
-    internal val title: String?,
-    internal val plainText: String?,
-    internal val largeIcon: Bitmap?,
-    internal val contentStyle: ContentStyle,
-    internal val semanticActions: List<NotificationCompat.Action>
+data class Content constructor(
+    val color: Int,
+    val time: Long?,
+    val info: String?,
+    val title: String?,
+    val plainText: String?,
+    val largeIcon: Bitmap?,
+    val contentStyle: ContentStyle,
+    val semanticActions: List<NotificationCompat.Action>
 ) {
 
     @ContentMarker
@@ -169,11 +177,25 @@ class Content private constructor(
         private var time: Long? = null,
         private var info: String? = null,
         private var title: String? = null,
-        private var message: String? = null,
+        private var plainText: String? = null,
         private var largeIcon: Bitmap? = null,
         private var contentStyle: ContentStyle = ContentStyle.NOTHING,
-        private var semanticActions: List<NotificationCompat.Action> = listOf()
+        private var semanticActions: MutableList<NotificationCompat.Action> = mutableListOf()
     ) {
+
+        constructor(content: Content) : this(
+            content.color,
+            content.time,
+            content.info,
+            content.title,
+            content.plainText,
+            content.largeIcon,
+            content.contentStyle,
+            content.semanticActions.toMutableList())
+
+        operator fun NotificationCompat.Action.unaryPlus() {
+            semanticActions.add(this)
+        }
 
         fun color(init: () -> Int) {
             color = init()
@@ -192,7 +214,7 @@ class Content private constructor(
         }
 
         fun plainText(init: () -> String?) {
-            message = init()
+            plainText = init()
         }
 
         fun largeIcon(init: () -> Bitmap?) {
@@ -215,12 +237,24 @@ class Content private constructor(
             contentStyle = ContentStyle.ImageStyle.Builder().build(init)
         }
 
+        fun semanticAction(init: SemanticActionBuilder.() -> Unit) {
+            +SemanticActionBuilder().apply(init).build()
+        }
+
+        @Deprecated(
+            "Use DSL-style function instead",
+            ReplaceWith(
+                "semanticAction(init: SemanticActionBuilder.() -> Unit)",
+                "ua.makovskyi.notificator.data"
+            ),
+            DeprecationLevel.WARNING
+        )
         fun semanticActions(vararg actions: NotificationCompat.Action) {
-            semanticActions = actions.toList()
+            semanticActions = actions.toMutableList()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Content = Content(color, time, info, title, message, largeIcon, contentStyle, semanticActions)
+        fun build(): Content = Content(color, time, info, title, plainText, largeIcon, contentStyle, semanticActions)
 
         internal fun build(init: Builder.() -> Unit): Content {
             init()

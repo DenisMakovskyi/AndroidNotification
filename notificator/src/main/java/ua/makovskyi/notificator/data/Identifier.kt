@@ -8,10 +8,10 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  * @author Denis Makovskyi
  */
 
-class Identifier private constructor(
-    internal val id: Int,
-    internal val sortKey: String?,
-    internal val groupKey: String?
+data class Identifier constructor(
+    val id: Int,
+    val sortKey: String?,
+    val groupKey: String?
 ) {
 
     @NotificationMarker
@@ -20,6 +20,11 @@ class Identifier private constructor(
         private var sortKey: String? = null,
         private var groupKey: String? = null
     ) {
+
+        constructor(identifier: Identifier) : this(
+            identifier.id,
+            identifier.sortKey,
+            identifier.groupKey)
 
         fun id(init: () -> Int) {
             id = init()

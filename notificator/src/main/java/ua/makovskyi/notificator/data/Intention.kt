@@ -34,10 +34,18 @@ class PendingIntentBuilder {
     private var pendingFlags: Int = PendingIntent.FLAG_UPDATE_CURRENT
     private var targetIntent: From = From.ACTIVITY
     private var packageContext: Context? = null
-    private var taskStackElements: List<TaskStackElement> = listOf()
+    private var taskStackElements: MutableList<TaskStackElement> = mutableListOf()
+
+    operator fun TaskStackElement.unaryPlus() {
+        taskStackElements.add(this)
+    }
 
     fun requestCode(init: () -> Int) {
         requestCode = init()
+    }
+
+    fun pendingFlag(init: () -> Int) {
+        pendingFlags = pendingFlags or init()
     }
 
     fun pendingFlags(vararg flags: Int) {
@@ -55,8 +63,20 @@ class PendingIntentBuilder {
         packageContext = init()
     }
 
+    fun taskStackElement(init: TaskStackElement.Builder.() -> Unit) {
+        +TaskStackElement.Builder().build(init)
+    }
+
+    @Deprecated(
+        "Use DSL-style function instead",
+        ReplaceWith(
+            "taskStackElement(init: TaskStackElement.Builder.() -> Unit)",
+            "ua.makovskyi.notificator.data"
+        ),
+        DeprecationLevel.WARNING
+    )
     fun taskStackElements(vararg elements: TaskStackElement) {
-        taskStackElements = elements.toList()
+        taskStackElements = elements.toMutableList()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -124,10 +144,10 @@ class PendingIntentBuilder {
     }
 }
 
-class Intention private constructor(
-    internal val autoCancel: Boolean,
-    internal val deleteIntent: PendingIntent?,
-    internal val contentIntent: PendingIntent?
+data class Intention constructor(
+    val autoCancel: Boolean,
+    val deleteIntent: PendingIntent?,
+    val contentIntent: PendingIntent?
 ) {
 
     @NotificationMarker
@@ -137,6 +157,11 @@ class Intention private constructor(
         private var deleteIntent: PendingIntent? = null,
         private var contentIntent: PendingIntent? = null
     ) {
+
+        constructor(intention: Intention) : this(
+            intention.autoCancel,
+            intention.deleteIntent,
+            intention.contentIntent)
 
         fun autoCancel(init: () -> Boolean) {
             autoCancel = init()

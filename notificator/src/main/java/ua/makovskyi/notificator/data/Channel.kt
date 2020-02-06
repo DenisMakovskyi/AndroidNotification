@@ -24,7 +24,7 @@ sealed class Importance(val priority: Int, val importance: Int) {
 
     object MIN : Importance(PRIORITY_MIN, IMPORTANCE_MIN)
     object LOW : Importance(PRIORITY_LOW, IMPORTANCE_LOW)
-    object HIGHT : Importance(PRIORITY_HIGH, IMPORTANCE_HIGH)
+    object HIGH : Importance(PRIORITY_HIGH, IMPORTANCE_HIGH)
     object MAXIMAL : Importance(PRIORITY_MAX, IMPORTANCE_MAX)
     object DEFAULT : Importance(PRIORITY_DEFAULT, IMPORTANCE_DEFAULT)
 }
@@ -38,10 +38,10 @@ sealed class Importance(val priority: Int, val importance: Int) {
  * @param channelName - notification channel name (human readable, will be displayed in applications manager).
  * @param channelDescription - notification channel description (human readable, will be displayed in applications manager).
  */
-class ChannelInfo private constructor(
-    internal val channelId: String,
-    internal val channelName: String,
-    internal val channelDescription: String?
+data class ChannelInfo constructor(
+    val channelId: String,
+    val channelName: String,
+    val channelDescription: String?
 ) {
 
     @ChannelMarker
@@ -50,6 +50,11 @@ class ChannelInfo private constructor(
         private var channelName: String = "GENERAL CHANNEL",
         private var channelDescription: String? = null
     ) {
+
+        constructor(info: ChannelInfo) : this(
+            info.channelId,
+            info.channelName,
+            info.channelDescription)
 
         fun channelId(init: () -> String) {
             channelId = init()
@@ -84,10 +89,10 @@ class ChannelInfo private constructor(
  *
  * (1) - the value may be truncated if it is too long.
  */
-class GroupingParams private constructor(
-    internal val groupId: String?,
-    internal val groupName: String?,
-    internal val groupDescription: String?
+data class GroupingParams constructor(
+    val groupId: String?,
+    val groupName: String?,
+    val groupDescription: String?
 ) {
 
     @ChannelMarker
@@ -96,6 +101,11 @@ class GroupingParams private constructor(
         private var groupName: String? = null,
         private var groupDescription: String? = null
     ) {
+
+        constructor(params: GroupingParams) : this(
+            params.groupId,
+            params.groupName,
+            params.groupDescription)
 
         fun groupId(init: () -> String?) {
             groupId = init()
@@ -119,8 +129,6 @@ class GroupingParams private constructor(
     }
 }
 
-fun channelGroupingParams(init: GroupingParams.Builder.() -> Unit): GroupingParams = GroupingParams.Builder().build(init)
-
 /**
  * Notification Channel settings.
  *
@@ -130,10 +138,10 @@ fun channelGroupingParams(init: GroupingParams.Builder.() -> Unit): GroupingPara
  * @param channelInfo - notification channel info parameters.
  * @param groupingParams - notification channel grouping parameters.
  */
-class Channel private constructor(
-    internal val importance: Importance,
-    internal val channelInfo: ChannelInfo,
-    internal val groupingParams: GroupingParams?
+data class Channel constructor(
+    val importance: Importance,
+    val channelInfo: ChannelInfo,
+    val groupingParams: GroupingParams?
 ) {
 
     @ChannelMarker
@@ -143,6 +151,11 @@ class Channel private constructor(
         private var channelInfo: ChannelInfo = ChannelInfo.Builder().build(),
         private var groupingParams: GroupingParams? = null
     ) {
+
+        constructor(channel: Channel) : this(
+            channel.importance,
+            channel.channelInfo,
+            channel.groupingParams)
 
         fun importance(init: () -> Importance?) {
             importance = init() ?: return
@@ -156,12 +169,20 @@ class Channel private constructor(
             channelInfo = ChannelInfo.Builder().build(init)
         }
 
+        fun channelInfo(info: ChannelInfo, init: ChannelInfo.Builder.() -> Unit) {
+            channelInfo = ChannelInfo.Builder(info).build(init)
+        }
+
         fun groupingParams(builder: GroupingParams.Builder) {
             groupingParams = builder.build()
         }
 
         fun groupingParams(init: GroupingParams.Builder.() -> Unit) {
             groupingParams = GroupingParams.Builder().build(init)
+        }
+
+        fun groupingParams(params: GroupingParams, init: GroupingParams.Builder.() -> Unit) {
+            groupingParams = GroupingParams.Builder(params).build(init)
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

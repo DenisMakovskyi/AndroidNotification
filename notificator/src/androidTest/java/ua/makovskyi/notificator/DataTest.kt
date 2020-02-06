@@ -16,9 +16,6 @@ class DataTest {
 
     @Test
     fun alarmTest() {
-        val sound = defaultNotificationSound()
-        val vibrate = longArrayOf(500L, 500L, 500L, 500L)
-        val ledLight = LEDLight(Color.BLUE, 100, 100)
 
         val alarm = notificationAlarm {
             sound { defaultNotificationSound() }
@@ -26,8 +23,13 @@ class DataTest {
             ledLight { LEDLight(Color.BLUE, 100, 100) }
         }
 
-        assertEquals(sound, alarm.sound)
-        assertArrayEquals(vibrate, alarm.vibrate)
-        assertEquals(ledLight, alarm.ledLight)
+        val notification = notification {
+            alarm(alarm) {
+                ledLight { LEDLight(Color.RED, 200, 200) }
+            }
+        }
+
+        assertArrayEquals(notification.alarm.vibrate, longArrayOf(500L, 500L, 500L, 500L))
+        assertNotEquals(notification.alarm.ledLight?.argb, Color.BLUE)
     }
 }

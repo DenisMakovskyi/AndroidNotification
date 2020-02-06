@@ -1,3 +1,5 @@
+@file:Suppress("ArrayInDataClass")
+
 package ua.makovskyi.notificator.data
 
 import java.util.concurrent.TimeUnit
@@ -23,9 +25,9 @@ import ua.makovskyi.notificator.utils.defaultNotificationSound
  * @param offMs - delay in milliseconds while led indicator is not glows.
  */
 data class LEDLight(
-    internal val argb: Int = Color.BLUE,
-    internal val onMs: Int = TimeUnit.SECONDS.toMillis(1).toInt(),
-    internal val offMs: Int = TimeUnit.SECONDS.toMillis(1).toInt())
+    val argb: Int = Color.BLUE,
+    val onMs: Int = TimeUnit.SECONDS.toMillis(1).toInt(),
+    val offMs: Int = TimeUnit.SECONDS.toMillis(1).toInt())
 
 /**
  * Notification sound capture policy.
@@ -53,11 +55,11 @@ enum class CapturePolicy(val policy: Int) {
  * @param ledLight - device LED indicator parameters.
  * @param capturePolicy - notification sound capture policy.
  */
-class Alarm private constructor(
-    internal val sound: Uri?,
-    internal val vibrate: LongArray?,
-    internal val ledLight: LEDLight?,
-    internal val capturePolicy: CapturePolicy
+data class Alarm constructor(
+    val sound: Uri?,
+    val vibrate: LongArray?,
+    val ledLight: LEDLight?,
+    val capturePolicy: CapturePolicy
 ) {
 
     @NotificationMarker
@@ -67,6 +69,12 @@ class Alarm private constructor(
         private var ledLight: LEDLight? = null,
         private var capturePolicy: CapturePolicy = CapturePolicy.ALLOW_BY_ALL
     ) {
+
+        constructor(alarm: Alarm) : this(
+            alarm.sound,
+            alarm.vibrate,
+            alarm.ledLight,
+            alarm.capturePolicy)
 
         fun sound(init: () -> Uri?) {
             sound = init()

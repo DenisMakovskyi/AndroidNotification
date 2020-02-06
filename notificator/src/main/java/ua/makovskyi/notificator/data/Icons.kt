@@ -12,10 +12,11 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  * @author Denis Makovskyi
  */
 
-class Icons private constructor(
-    internal val badgeType: Int,
-    internal val smallIcon: Int,
-    internal val smallTint: Int) {
+data class Icons constructor(
+    val badgeType: Int,
+    val smallIcon: Int,
+    val smallTint: Int
+) {
 
     @NotificationMarker
     class Builder(
@@ -26,6 +27,11 @@ class Icons private constructor(
         @ColorRes
         private var smallTint: Int = 0
     ) {
+
+        constructor(icons: Icons) : this(
+            icons.badgeType,
+            icons.smallIcon,
+            icons.smallTint)
 
         fun badgeType(init: () -> Int) {
             badgeType = init()

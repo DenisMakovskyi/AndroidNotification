@@ -167,7 +167,7 @@ private fun RemoteMessage.ofImportance(): Importance {
     return when(notification?.notificationPriority) {
         NotificationManager.IMPORTANCE_LOW -> Importance.LOW
         NotificationManager.IMPORTANCE_MIN -> Importance.MIN
-        NotificationManager.IMPORTANCE_HIGH -> Importance.HIGHT
+        NotificationManager.IMPORTANCE_HIGH -> Importance.HIGH
         NotificationManager.IMPORTANCE_MAX -> Importance.MAXIMAL
         else -> Importance.DEFAULT
     }
@@ -187,16 +187,14 @@ private fun RemoteMessage.ofContentIntent(context: Context): PendingIntentBuilde
     return PendingIntentBuilder().also { builder ->
         builder.targetIntent { From.ACTIVITY }
         builder.packageContext { context }
-        builder.taskStackElements(
-            taskStackElement {
-                howPut { HowPut.ONLY_NEXT_INTENT }
-                intent {
-                    from { ConstructFrom.ACTION }
-                    intentAction { clickAction }
-                    intentExtras { if (data.isNotEmpty()) data.toBundle() else null }
-                }
+        builder.taskStackElement {
+            howPut { HowPut.ONLY_NEXT_INTENT }
+            intent {
+                from { ConstructFrom.ACTION }
+                intentAction { clickAction }
+                intentExtras { if (data.isNotEmpty()) data.toBundle() else null }
             }
-        )
+        }
     }
 }
 
