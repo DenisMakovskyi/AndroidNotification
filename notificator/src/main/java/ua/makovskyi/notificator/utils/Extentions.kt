@@ -57,7 +57,6 @@ fun <V> Map<String, V?>.toBundle(): Bundle {
     return bundle
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 @UseExperimental(ExperimentalContracts::class)
 internal inline fun <T> T.only(block: (T) -> Unit) {
     contract {
@@ -66,7 +65,6 @@ internal inline fun <T> T.only(block: (T) -> Unit) {
     block(this)
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 @UseExperimental(ExperimentalContracts::class)
 internal inline fun <T> T?.safe(block: (T) -> Unit) {
     contract {
@@ -75,18 +73,15 @@ internal inline fun <T> T?.safe(block: (T) -> Unit) {
     if (this != null) block(this)
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 internal fun Collection<*>.isSingle(): Boolean {
     return this.size == 1
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 internal fun <T, R> List<T>.fromFirst(block: (T?) -> R?): R? {
     if (isEmpty()) throw NoSuchElementException("List is empty.")
     return block(this[0])
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 internal inline fun <reified T> Context.findSystemService(): T? {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         getSystemService(T::class.java)
