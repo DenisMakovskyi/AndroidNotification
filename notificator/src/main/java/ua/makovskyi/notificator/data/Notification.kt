@@ -90,7 +90,17 @@ data class Notification constructor(
         }
     }
 
-    fun show(context: Context) = Notificator.showNotification(context, this)
+    fun show(context: Context) {
+        Notificator.showNotification(context, this)
+    }
+
+    fun build(context: Context): android.app.Notification {
+        return Notificator.buildNotification(context, this)
+    }
+
+    fun createChannel(context: Context) {
+        Notificator.createChannel(channel, alarm)
+    }
 }
 
 fun notification(init: Notification.Builder.() -> Unit): Notification = Notification.Builder().build(init)

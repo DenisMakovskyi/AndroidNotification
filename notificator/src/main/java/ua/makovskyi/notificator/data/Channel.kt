@@ -3,6 +3,7 @@ package ua.makovskyi.notificator.data
 import android.app.NotificationManager.*
 
 import androidx.annotation.RestrictTo
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.*
 
 import ua.makovskyi.notificator.dsl.ChannelMarker
@@ -22,6 +23,7 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  */
 sealed class Importance(val priority: Int, val importance: Int) {
 
+    object NONE : Importance(PRIORITY_MIN, IMPORTANCE_NONE)
     object MIN : Importance(PRIORITY_MIN, IMPORTANCE_MIN)
     object LOW : Importance(PRIORITY_LOW, IMPORTANCE_LOW)
     object HIGH : Importance(PRIORITY_HIGH, IMPORTANCE_HIGH)
@@ -134,11 +136,13 @@ data class GroupingParams constructor(
  *
  * If SDK does not support Notification Channels - channelInfo and groupingParams will be ignored.
  *
+ * @param visibility - visibility on lock screen.
  * @param importance - notification importance.
  * @param channelInfo - notification channel info parameters.
  * @param groupingParams - notification channel grouping parameters.
  */
 data class Channel constructor(
+    val visibility: Int,
     val importance: Importance,
     val channelInfo: ChannelInfo,
     val groupingParams: GroupingParams?
@@ -147,15 +151,22 @@ data class Channel constructor(
     @ChannelMarker
     @NotificationMarker
     class Builder(
+        @NotificationVisibility
+        private var visibility: Int = VISIBILITY_PUBLIC,
         private var importance: Importance = Importance.DEFAULT,
         private var channelInfo: ChannelInfo = ChannelInfo.Builder().build(),
         private var groupingParams: GroupingParams? = null
     ) {
 
         constructor(channel: Channel) : this(
+            channel.visibility,
             channel.importance,
             channel.channelInfo,
             channel.groupingParams)
+
+        fun visibility(init: () -> Int) {
+            visibility = init()
+        }
 
         fun importance(init: () -> Importance?) {
             importance = init() ?: return
@@ -186,7 +197,7 @@ data class Channel constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Channel = Channel(importance, channelInfo, groupingParams)
+        fun build(): Channel = Channel(visibility, importance, channelInfo, groupingParams)
 
         internal fun build(init: Builder.() -> Unit): Channel {
             init()

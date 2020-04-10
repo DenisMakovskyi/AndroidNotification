@@ -165,6 +165,7 @@ private fun RemoteMessage.ofImage(): String? {
 
 private fun RemoteMessage.ofImportance(): Importance {
     return when(notification?.notificationPriority) {
+        NotificationManager.IMPORTANCE_NONE -> Importance.NONE
         NotificationManager.IMPORTANCE_LOW -> Importance.LOW
         NotificationManager.IMPORTANCE_MIN -> Importance.MIN
         NotificationManager.IMPORTANCE_HIGH -> Importance.HIGH

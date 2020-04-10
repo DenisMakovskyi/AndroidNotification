@@ -1,10 +1,10 @@
 package ua.makovskyi.notificator.data
 
 import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
-import androidx.core.app.NotificationCompat.BADGE_ICON_NONE
+import androidx.annotation.DrawableRes
 import androidx.core.app.NotificationCompat.BadgeIconType
+import androidx.core.app.NotificationCompat.BADGE_ICON_NONE
 
 import ua.makovskyi.notificator.dsl.NotificationMarker
 

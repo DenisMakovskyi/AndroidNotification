@@ -109,11 +109,16 @@ object Notificator {
             builder.setDeleteIntent(notification.intention.deleteIntent)
             builder.setContentIntent(notification.intention.contentIntent)
             // - identifier
-            notification.identifier.groupKey.safe { groupKey ->
-                builder.setGroup(groupKey)
-                builder.setGroupSummary(true)
-                notification.identifier.sortKey.safe { sortKey ->
-                    builder.setSortKey(sortKey)
+            with(notification.identifier) {
+                groupKey.safe { groupKey ->
+                    builder.setGroup(groupKey)
+                    builder.setGroupSummary(true)
+                    sortKey.safe { sortKey ->
+                        builder.setSortKey(sortKey)
+                    }
+                }
+                category.safe { category ->
+                    builder.setCategory(category)
                 }
             }
             // - priority before Oreo
@@ -128,6 +133,9 @@ object Notificator {
             channel.channelInfo.channelName,
             channel.importance.importance // importance after Oreo
         ).apply {
+            // - visibility on lock screen
+            lockscreenVisibility = channel.visibility
+            // - description info and grouping
             channel.channelInfo.channelDescription.safe { channelDescription ->
                 description = channelDescription
             }
