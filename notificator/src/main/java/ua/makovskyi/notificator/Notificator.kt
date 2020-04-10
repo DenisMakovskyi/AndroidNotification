@@ -1,11 +1,11 @@
 package ua.makovskyi.notificator
 
+import android.os.Build
+import android.content.Context
 import android.annotation.TargetApi
+import android.media.AudioAttributes
 import android.app.NotificationChannel
 import android.app.NotificationChannelGroup
-import android.content.Context
-import android.media.AudioAttributes
-import android.os.Build
 
 import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
@@ -21,38 +21,61 @@ import ua.makovskyi.notificator.utils.*
 object Notificator {
 
     fun showNotification(context: Context, notification: Notification) {
-        NotificationCompat.Builder(context, notification.channel.channelInfo.channelId).apply {
+        val androidNotification = buildNotification(context, notification)
+        NotificationManagerCompat.from(context).apply {
+            // - channel and channel group
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // - channel
+                if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
+                    createNotificationChannel(createChannel(notification.channel, notification.alarm))
+                }
+                // - group
+                notification.channel.groupingParams.safe { groupingParams ->
+                    if (groupingParams.groupId != null && getNotificationChannelGroup(groupingParams.groupId) == null) {
+                        createChannelGroup(groupingParams).safe { group ->
+                            createNotificationChannelGroup(group)
+                        }
+                    }
+                }
+            }
+        }.safe { manager ->
+            manager.notify(notification.identifier.id, androidNotification)
+        }
+    }
+
+    fun buildNotification(context: Context, notification: Notification): android.app.Notification {
+        return NotificationCompat.Builder(context, notification.channel.channelInfo.channelId).also { builder ->
             // - alarm
-            setSound(notification.alarm.sound)
-            setVibrate(notification.alarm.vibrate)
+            builder.setSound(notification.alarm.sound)
+            builder.setVibrate(notification.alarm.vibrate)
             notification.alarm.ledLight.safe { led ->
-                setLights(led.argb, led.onMs, led.offMs)
+                builder.setLights(led.argb, led.onMs, led.offMs)
             }
             // - icons
             notification.icons.only { icons ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    setBadgeIconType(icons.badgeType)
+                    builder.setBadgeIconType(icons.badgeType)
                 }
                 if (icons.smallIcon != 0) {
-                    setSmallIcon(icons.smallIcon)
+                    builder.setSmallIcon(icons.smallIcon)
                 }
                 if (icons.smallTint != 0) {
-                    color = ContextCompat.getColor(context, icons.smallTint)
+                    builder.color = ContextCompat.getColor(context, icons.smallTint)
                 }
             }
             // - content
             if (notification.content.color != 0) {
-                color = notification.content.color
-                setColorized(true)
+                builder.color = notification.content.color
+                builder.setColorized(true)
             }
             notification.content.time.safe { time ->
-                setWhen(time)
-                setShowWhen(true)
+                builder.setWhen(time)
+                builder.setShowWhen(true)
             }
-            setContentInfo(notification.content.info)
-            setContentTitle(notification.content.title)
-            setContentText(notification.content.plainText)
-            setLargeIcon(notification.content.largeIcon)
+            builder.setContentInfo(notification.content.info)
+            builder.setContentTitle(notification.content.title)
+            builder.setContentText(notification.content.plainText)
+            builder.setLargeIcon(notification.content.largeIcon)
             // - content style
             val style = when(notification.content.contentStyle) {
                 is ContentStyle.TextStyle -> {
@@ -76,52 +99,31 @@ object Notificator {
                 }
                 is ContentStyle.NOTHING -> null
             }
-            if (style != null) setStyle(style)
+            if (style != null) builder.setStyle(style)
             // - actions
             for (action in notification.content.semanticActions) {
-                addAction(action)
+                builder.addAction(action)
             }
             // - intention
-            setAutoCancel(notification.intention.autoCancel)
-            setDeleteIntent(notification.intention.deleteIntent)
-            setContentIntent(notification.intention.contentIntent)
+            builder.setAutoCancel(notification.intention.autoCancel)
+            builder.setDeleteIntent(notification.intention.deleteIntent)
+            builder.setContentIntent(notification.intention.contentIntent)
             // - identifier
             notification.identifier.groupKey.safe { groupKey ->
-                setGroup(groupKey)
-                setGroupSummary(true)
+                builder.setGroup(groupKey)
+                builder.setGroupSummary(true)
                 notification.identifier.sortKey.safe { sortKey ->
-                    setSortKey(sortKey)
+                    builder.setSortKey(sortKey)
                 }
             }
             // - priority before Oreo
-            priority = notification.channel.importance.priority
-
-        }.only { builder ->
-            NotificationManagerCompat.from(context).apply {
-                // - channel and channel group
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    // - channel
-                    if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
-                        createNotificationChannel(createChannel(notification.channel, notification.alarm))
-                    }
-                    // - group
-                    notification.channel.groupingParams.safe { groupingParams ->
-                        if (groupingParams.groupId != null && getNotificationChannelGroup(groupingParams.groupId) == null) {
-                            createChannelGroup(groupingParams).safe { group ->
-                                createNotificationChannelGroup(group)
-                            }
-                        }
-                    }
-                }
-            }.safe { manager ->
-                manager.notify(notification.identifier.id, builder.build())
-            }
-        }
+            builder.priority = notification.channel.importance.priority
+        }.build()
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun createChannel(channel: Channel, alarm: Alarm): NotificationChannel =
-        NotificationChannel(
+    fun createChannel(channel: Channel, alarm: Alarm): NotificationChannel {
+        return NotificationChannel(
             channel.channelInfo.channelId,
             channel.channelInfo.channelName,
             channel.importance.importance // importance after Oreo
@@ -155,10 +157,11 @@ object Notificator {
                 lightColor = led.argb
             }
         }
+    }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun createChannelGroup(groupingParams: GroupingParams): NotificationChannelGroup? =
-        if (groupingParams.groupId != null && groupingParams.groupName != null) {
+    fun createChannelGroup(groupingParams: GroupingParams): NotificationChannelGroup? {
+        return if (groupingParams.groupId != null && groupingParams.groupName != null) {
             NotificationChannelGroup(groupingParams.groupId, groupingParams.groupName).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     groupingParams.groupDescription.safe { groupDescription ->
@@ -169,4 +172,5 @@ object Notificator {
         } else {
             null
         }
+    }
 }
