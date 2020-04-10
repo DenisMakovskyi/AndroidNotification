@@ -94,12 +94,12 @@ data class Notification constructor(
         Notificator.showNotification(context, this)
     }
 
-    fun build(context: Context): android.app.Notification {
-        return Notificator.buildNotification(context, this)
+    fun createNotificationChannel(context: Context) {
+        Notificator.createNotificationChannel(context, channel, alarm)
     }
 
-    fun createChannel(context: Context) {
-        Notificator.createChannel(channel, alarm)
+    fun buildAndroidNotification(context: Context): android.app.Notification {
+        return Notificator.buildAndroidNotification(context, this)
     }
 }
 

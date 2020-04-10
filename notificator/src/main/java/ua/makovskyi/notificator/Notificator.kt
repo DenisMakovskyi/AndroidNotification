@@ -21,29 +21,13 @@ import ua.makovskyi.notificator.utils.*
 object Notificator {
 
     fun showNotification(context: Context, notification: Notification) {
-        val androidNotification = buildNotification(context, notification)
-        NotificationManagerCompat.from(context).apply {
-            // - channel and channel group
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // - channel
-                if (getNotificationChannel(notification.channel.channelInfo.channelId) == null) {
-                    createNotificationChannel(createChannel(notification.channel, notification.alarm))
-                }
-                // - group
-                notification.channel.groupingParams.safe { groupingParams ->
-                    if (groupingParams.groupId != null && getNotificationChannelGroup(groupingParams.groupId) == null) {
-                        createChannelGroup(groupingParams).safe { group ->
-                            createNotificationChannelGroup(group)
-                        }
-                    }
-                }
-            }
-        }.safe { manager ->
-            manager.notify(notification.identifier.id, androidNotification)
-        }
+        val notificationManager = NotificationManagerCompat.from(context)
+        val androidNotification = buildAndroidNotification(context, notification)
+        createNotificationChannel(context, notification.channel, notification.alarm)
+        notificationManager.notify(notification.identifier.id, androidNotification)
     }
 
-    fun buildNotification(context: Context, notification: Notification): android.app.Notification {
+    fun buildAndroidNotification(context: Context, notification: Notification): android.app.Notification {
         return NotificationCompat.Builder(context, notification.channel.channelInfo.channelId).also { builder ->
             // - alarm
             builder.setSound(notification.alarm.sound)
@@ -110,6 +94,7 @@ object Notificator {
             builder.setContentIntent(notification.intention.contentIntent)
             // - identifier
             with(notification.identifier) {
+                builder.setOngoing(ongoing)
                 groupKey.safe { groupKey ->
                     builder.setGroup(groupKey)
                     builder.setGroupSummary(true)
@@ -127,8 +112,8 @@ object Notificator {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun createChannel(channel: Channel, alarm: Alarm): NotificationChannel {
-        return NotificationChannel(
+    fun createNotificationChannel(context: Context, channel: Channel, alarm: Alarm) {
+        val notificationChannel = NotificationChannel(
             channel.channelInfo.channelId,
             channel.channelInfo.channelName,
             channel.importance.importance // importance after Oreo
@@ -165,10 +150,27 @@ object Notificator {
                 lightColor = led.argb
             }
         }
+        NotificationManagerCompat.from(context).also { manager ->
+            // - channel and channel group
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // - channel
+                if (manager.getNotificationChannel(channel.channelInfo.channelId) == null) {
+                    manager.createNotificationChannel(notificationChannel)
+                }
+                // - group
+                channel.groupingParams.safe { groupingParams ->
+                    if (groupingParams.groupId != null && manager.getNotificationChannelGroup(groupingParams.groupId) == null) {
+                        createNotificationChannelGroup(groupingParams).safe { group ->
+                            manager.createNotificationChannelGroup(group)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    fun createChannelGroup(groupingParams: GroupingParams): NotificationChannelGroup? {
+    fun createNotificationChannelGroup(groupingParams: GroupingParams): NotificationChannelGroup? {
         return if (groupingParams.groupId != null && groupingParams.groupName != null) {
             NotificationChannelGroup(groupingParams.groupId, groupingParams.groupName).apply {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

@@ -10,6 +10,7 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
 
 data class Identifier constructor(
     val id: Int,
+    val ongoing: Boolean,
     val sortKey: String?,
     val groupKey: String?,
     val category: String?
@@ -18,6 +19,7 @@ data class Identifier constructor(
     @NotificationMarker
     class Builder(
         private var id: Int = 0,
+        private var ongoing: Boolean = false,
         private var sortKey: String? = null,
         private var groupKey: String? = null,
         private var category: String? = null
@@ -25,12 +27,17 @@ data class Identifier constructor(
 
         constructor(identifier: Identifier) : this(
             identifier.id,
+            identifier.ongoing,
             identifier.sortKey,
             identifier.groupKey,
             identifier.category)
 
         fun id(init: () -> Int) {
             id = init()
+        }
+
+        fun ongoing(init: () -> Boolean) {
+            ongoing = init()
         }
 
         fun sortKey(init: () -> String?) {
@@ -46,7 +53,7 @@ data class Identifier constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Identifier = Identifier(id, sortKey, groupKey, category)
+        fun build(): Identifier = Identifier(id, ongoing, sortKey, groupKey, category)
 
         internal fun build(init: Builder.() -> Unit): Identifier {
             init()
