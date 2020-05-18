@@ -24,6 +24,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     kotlinOptions  {
         jvmTarget = "1.8"
         freeCompilerArgs = ["-Xuse-experimental=kotlin.Experimental"]
@@ -45,8 +50,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
     // Navigation
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.0-alpha04"
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.0-alpha04"
+    implementation 'androidx.navigation:navigation-ui-ktx:2.3.0-alpha06'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.0-alpha06'
 
     // Unit tests
     testImplementation "junit:junit:4.13"

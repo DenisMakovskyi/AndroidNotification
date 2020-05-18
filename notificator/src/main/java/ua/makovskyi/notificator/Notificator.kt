@@ -2,11 +2,11 @@ package ua.makovskyi.notificator
 
 import android.os.Build
 import android.content.Context
-import android.annotation.TargetApi
 import android.media.AudioAttributes
 import android.app.NotificationChannel
 import android.app.NotificationChannelGroup
 
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -23,7 +23,9 @@ object Notificator {
     fun showNotification(context: Context, notification: Notification) {
         val notificationManager = NotificationManagerCompat.from(context)
         val androidNotification = buildAndroidNotification(context, notification)
-        createNotificationChannel(context, notification.channel, notification.alarm)
+        if (isApiLevel(Build.VERSION_CODES.P)) {
+            createNotificationChannel(context, notification.channel, notification.alarm)
+        }
         notificationManager.notify(notification.identifier.id, androidNotification)
     }
 
@@ -37,7 +39,7 @@ object Notificator {
             }
             // - icons
             notification.icons.only { icons ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (isApiLevel(Build.VERSION_CODES.O)) {
                     builder.setBadgeIconType(icons.badgeType)
                 }
                 if (icons.smallIcon != 0) {
@@ -111,48 +113,48 @@ object Notificator {
         }.build()
     }
 
-    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannel(context: Context, channel: Channel, alarm: Alarm) {
         val notificationChannel = NotificationChannel(
             channel.channelInfo.channelId,
             channel.channelInfo.channelName,
             channel.importance.importance // importance after Oreo
-        ).apply {
+        ).also { androidChannel ->
             // - visibility on lock screen
-            lockscreenVisibility = channel.visibility
+            androidChannel.lockscreenVisibility = channel.visibility
             // - description info and grouping
             channel.channelInfo.channelDescription.safe { channelDescription ->
-                description = channelDescription
+                androidChannel.description = channelDescription
             }
             channel.groupingParams?.groupId.safe { groupId ->
-                group = groupId
+                androidChannel.group = groupId
             }
             // - sound
             alarm.sound.safe { uri ->
-                setSound(uri, AudioAttributes.Builder()
-                    .apply {
-                        setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                androidChannel.setSound(uri, AudioAttributes.Builder()
+                    .also { attrs ->
+                        attrs.setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        attrs.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            setAllowedCapturePolicy(alarm.capturePolicy.policy)
+                            attrs.setAllowedCapturePolicy(alarm.capturePolicy.policy)
                         }
                     }.build())
             }
             // - vibration
             alarm.vibrate.safe { pattern ->
-                enableVibration(true)
-                vibrationPattern = pattern
+                androidChannel.enableVibration(true)
+                androidChannel.vibrationPattern = pattern
 
             }
             // - led indicator
             alarm.ledLight.safe { led ->
-                enableLights(true)
-                lightColor = led.argb
+                androidChannel.enableLights(true)
+                androidChannel.lightColor = led.argb
             }
         }
         NotificationManagerCompat.from(context).also { manager ->
             // - channel and channel group
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (isApiLevel(Build.VERSION_CODES.O)) {
                 // - channel
                 if (manager.getNotificationChannel(channel.channelInfo.channelId) == null) {
                     manager.createNotificationChannel(notificationChannel)
@@ -169,13 +171,13 @@ object Notificator {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannelGroup(groupingParams: GroupingParams): NotificationChannelGroup? {
         return if (groupingParams.groupId != null && groupingParams.groupName != null) {
-            NotificationChannelGroup(groupingParams.groupId, groupingParams.groupName).apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            NotificationChannelGroup(groupingParams.groupId, groupingParams.groupName).also { group ->
+                if (isApiLevel(Build.VERSION_CODES.P)) {
                     groupingParams.groupDescription.safe { groupDescription ->
-                        description = groupDescription
+                        group.description = groupDescription
                     }
                 }
             }

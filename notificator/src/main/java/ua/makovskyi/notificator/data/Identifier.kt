@@ -8,7 +8,7 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  * @author Denis Makovskyi
  */
 
-data class Identifier constructor(
+data class Identifier(
     val id: Int,
     val ongoing: Boolean,
     val sortKey: String?,

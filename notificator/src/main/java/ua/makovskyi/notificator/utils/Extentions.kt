@@ -4,8 +4,6 @@ import kotlin.contracts.contract
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.ExperimentalContracts
 
-import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 
@@ -57,7 +55,7 @@ fun <V> Map<String, V?>.toBundle(): Bundle {
     return bundle
 }
 
-@UseExperimental(ExperimentalContracts::class)
+@OptIn(ExperimentalContracts::class)
 internal inline fun <T> T.only(block: (T) -> Unit) {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
@@ -65,7 +63,7 @@ internal inline fun <T> T.only(block: (T) -> Unit) {
     block(this)
 }
 
-@UseExperimental(ExperimentalContracts::class)
+@OptIn(ExperimentalContracts::class)
 internal inline fun <T> T?.safe(block: (T) -> Unit) {
     contract {
         callsInPlace(block, InvocationKind.AT_MOST_ONCE)
@@ -80,13 +78,4 @@ internal fun Collection<*>.isSingle(): Boolean {
 internal fun <T, R> List<T>.fromFirst(block: (T?) -> R?): R? {
     if (isEmpty()) throw NoSuchElementException("List is empty.")
     return block(this[0])
-}
-
-internal inline fun <reified T> Context.findSystemService(): T? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        getSystemService(T::class.java)
-    } else {
-        val name = getSystemServiceName(T::class.java)
-        if (name != null) getSystemService(name) as T? else null
-    }
 }

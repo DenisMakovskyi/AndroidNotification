@@ -55,7 +55,7 @@ enum class CapturePolicy(val policy: Int) {
  * @param ledLight - device LED indicator parameters.
  * @param capturePolicy - notification sound capture policy.
  */
-data class Alarm constructor(
+data class Alarm(
     val sound: Uri?,
     val vibrate: LongArray?,
     val ledLight: LEDLight?,

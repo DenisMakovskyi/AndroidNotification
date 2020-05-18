@@ -158,7 +158,7 @@ class SemanticActionBuilder {
 )
 fun semanticAction(init: SemanticActionBuilder.() -> Unit): NotificationCompat.Action = SemanticActionBuilder().build(init)
 
-data class Content constructor(
+data class Content(
     val color: Int,
     val time: Long?,
     val info: String?,

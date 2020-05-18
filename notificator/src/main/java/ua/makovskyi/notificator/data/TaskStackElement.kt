@@ -1,16 +1,16 @@
 package ua.makovskyi.notificator.data
 
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.content.Intent
+import android.content.Context
 
 import androidx.annotation.RestrictTo
 
 import ua.makovskyi.notificator.dsl.IntentMarker
 import ua.makovskyi.notificator.dsl.TaskStackMarker
-import ua.makovskyi.notificator.utils.buildMessage
 import ua.makovskyi.notificator.utils.safe
+import ua.makovskyi.notificator.utils.buildMessage
 
 /**
  * @author Denis Makovskyi

@@ -2,20 +2,20 @@ package ua.makovskyi.notificator.firebase
 
 import kotlinx.coroutines.runBlocking
 
-import android.app.NotificationManager
-import android.content.Context
-import android.graphics.Color
 import android.net.Uri
+import android.graphics.Color
+import android.content.Context
+import android.app.NotificationManager
 
 import coil.Coil
-import coil.api.get
+import coil.request.GetRequest
 
 import com.google.firebase.messaging.RemoteMessage
 
 import ua.makovskyi.notificator.data.*
-import ua.makovskyi.notificator.utils.defaultNotificationSound
-import ua.makovskyi.notificator.utils.isTextMaxLengthExceeded
 import ua.makovskyi.notificator.utils.toBundle
+import ua.makovskyi.notificator.utils.isTextMaxLengthExceeded
+import ua.makovskyi.notificator.utils.defaultNotificationSound
 
 /**
  * Created by azazellj, Denis Makovskyi.
@@ -50,7 +50,13 @@ fun RemoteMessage.wrap(
             val imageUrl = ofImage()
             if (imageUrl != null) {
                 val bitmap = runBlocking {
-                    drawableToBitmap(Coil.get(imageUrl))
+                    val request = GetRequest.Builder(appContext)
+                        .data(imageUrl)
+                        .build()
+                    drawableToBitmap(
+                        Coil.imageLoader(appContext)
+                            .execute(request)
+                            .drawable)
                 }
                 largeIcon { bitmap }
                 withImageStyle {

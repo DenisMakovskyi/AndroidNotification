@@ -1,6 +1,9 @@
 package ua.makovskyi.notificator.data
 
+import android.os.Build
 import android.content.Context
+
+import androidx.annotation.RequiresApi
 
 import ua.makovskyi.notificator.Notificator
 import ua.makovskyi.notificator.dsl.NotificationMarker
@@ -9,7 +12,7 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  * @author Denis Makovskyi
  */
 
-data class Notification constructor(
+data class Notification(
     val alarm: Alarm,
     val icons: Icons,
     val content: Content,
@@ -94,6 +97,7 @@ data class Notification constructor(
         Notificator.showNotification(context, this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationChannel(context: Context) {
         Notificator.createNotificationChannel(context, channel, alarm)
     }

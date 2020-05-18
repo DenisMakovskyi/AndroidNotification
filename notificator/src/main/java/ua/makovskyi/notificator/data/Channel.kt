@@ -40,7 +40,7 @@ sealed class Importance(val priority: Int, val importance: Int) {
  * @param channelName - notification channel name (human readable, will be displayed in applications manager).
  * @param channelDescription - notification channel description (human readable, will be displayed in applications manager).
  */
-data class ChannelInfo constructor(
+data class ChannelInfo(
     val channelId: String,
     val channelName: String,
     val channelDescription: String?
@@ -91,7 +91,7 @@ data class ChannelInfo constructor(
  *
  * (1) - the value may be truncated if it is too long.
  */
-data class GroupingParams constructor(
+data class GroupingParams(
     val groupId: String?,
     val groupName: String?,
     val groupDescription: String?
@@ -136,12 +136,12 @@ data class GroupingParams constructor(
  *
  * If SDK does not support Notification Channels - channelInfo and groupingParams will be ignored.
  *
- * @param visibility - visibility on lock screen.
+ * @param visibility - visibility on locked screen.
  * @param importance - notification importance.
  * @param channelInfo - notification channel info parameters.
  * @param groupingParams - notification channel grouping parameters.
  */
-data class Channel constructor(
+data class Channel(
     val visibility: Int,
     val importance: Importance,
     val channelInfo: ChannelInfo,

@@ -2,11 +2,12 @@ package ua.makovskyi.notificator.utils
 
 import kotlin.reflect.KClass
 
+import android.net.Uri
+import android.os.Build
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.RingtoneManager
-import android.net.Uri
 
 import androidx.annotation.DrawableRes
 
@@ -20,6 +21,10 @@ fun bitmapFromResources(context: Context, @DrawableRes id: Int): Bitmap? {
 
 fun defaultNotificationSound(): Uri {
     return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+}
+
+internal fun isApiLevel(level: Int): Boolean {
+    return Build.VERSION.SDK_INT >= level
 }
 
 internal fun buildMessage(cls: KClass<*>, message: String): String {

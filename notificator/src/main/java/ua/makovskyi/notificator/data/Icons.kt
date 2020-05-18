@@ -12,7 +12,7 @@ import ua.makovskyi.notificator.dsl.NotificationMarker
  * @author Denis Makovskyi
  */
 
-data class Icons constructor(
+data class Icons(
     val badgeType: Int,
     val smallIcon: Int,
     val smallTint: Int

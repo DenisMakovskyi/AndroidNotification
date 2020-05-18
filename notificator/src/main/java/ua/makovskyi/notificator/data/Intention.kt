@@ -211,7 +211,7 @@ class NavPendingIntentBuilder {
     }
 }
 
-data class Intention constructor(
+data class Intention(
     val autoCancel: Boolean,
     val deleteIntent: PendingIntent?,
     val contentIntent: PendingIntent?
