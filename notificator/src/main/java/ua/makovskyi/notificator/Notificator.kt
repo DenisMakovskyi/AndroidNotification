@@ -23,7 +23,7 @@ object Notificator {
     fun showNotification(context: Context, notification: Notification) {
         val notificationManager = NotificationManagerCompat.from(context)
         val androidNotification = buildAndroidNotification(context, notification)
-        if (isApiLevel(Build.VERSION_CODES.P)) {
+        if (isApiLevel(Build.VERSION_CODES.O)) {
             createNotificationChannel(context, notification.channel, notification.alarm)
         }
         notificationManager.notify(notification.identifier.id, androidNotification)
@@ -135,7 +135,7 @@ object Notificator {
                     .also { attrs ->
                         attrs.setUsage(AudioAttributes.USAGE_NOTIFICATION)
                         attrs.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (isApiLevel(Build.VERSION_CODES.Q)) {
                             attrs.setAllowedCapturePolicy(alarm.capturePolicy.policy)
                         }
                     }.build())
