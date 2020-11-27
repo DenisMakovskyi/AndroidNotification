@@ -23,7 +23,7 @@ fun String?.isTextMaxLengthExceeded(): Boolean {
 fun <V> Map<String, V?>.toBundle(): Bundle {
     val bundle = Bundle(size)
     for (entry in this) {
-        when(val value = entry.value) {
+        when (val value = entry.value) {
             null -> bundle.putString(entry.key, null)
 
             // Scalars

@@ -191,7 +191,8 @@ data class Content(
             content.plainText,
             content.largeIcon,
             content.contentStyle,
-            content.semanticActions.toMutableList())
+            content.semanticActions.toMutableList()
+        )
 
         operator fun NotificationCompat.Action.unaryPlus() {
             semanticActions.add(this)
@@ -254,7 +255,8 @@ data class Content(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun build(): Content = Content(color, time, info, title, plainText, largeIcon, contentStyle, semanticActions)
+        fun build(): Content =
+            Content(color, time, info, title, plainText, largeIcon, contentStyle, semanticActions)
 
         internal fun build(init: Builder.() -> Unit): Content {
             init()

@@ -11,10 +11,6 @@ import ua.makovskyi.notificator.data.Intention
 
 open class AutoNotificationService : FirebaseMessagingService() {
 
-    override fun onNewToken(newToken: String) {
-        super.onNewToken(newToken)
-    }
-
     override fun onMessageReceived(message: RemoteMessage) {
         message.wrap(applicationContext) { onManualIntention(message) }.show(this)
     }

@@ -31,7 +31,8 @@ data class Icons(
         constructor(icons: Icons) : this(
             icons.badgeType,
             icons.smallIcon,
-            icons.smallTint)
+            icons.smallTint
+        )
 
         fun badgeType(init: () -> Int) {
             badgeType = init()

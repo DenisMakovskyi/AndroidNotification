@@ -1,6 +1,7 @@
 package ua.makovskyi.notificator.firebase
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
 
 import android.net.Uri
 import android.graphics.Color
@@ -8,7 +9,7 @@ import android.content.Context
 import android.app.NotificationManager
 
 import coil.Coil
-import coil.request.GetRequest
+import coil.request.ImageRequest
 
 import com.google.firebase.messaging.RemoteMessage
 
@@ -47,38 +48,40 @@ fun RemoteMessage.wrap(
             // If notification contains image url, ImageStyle is using, otherwise,
             // checking whether title or plain text length is not exceed maximal available text length for notification,
             // then TextStyle is using, in order to keep title and text completely visible for user.
-            val imageUrl = ofImage()
-            if (imageUrl != null) {
-                val bitmap = runBlocking {
-                    val request = GetRequest.Builder(appContext)
-                        .data(imageUrl)
-                        .build()
-                    drawableToBitmap(
-                        Coil.imageLoader(appContext)
-                            .execute(request)
-                            .drawable)
-                }
-                largeIcon { bitmap }
-                withImageStyle {
-                    behaviour { StyleBehaviour.OVERRIDE }
-                    title { title }
-                    summary { plainText }
-                    largeIcon { null }
-                    bigPicture { bitmap }
-                }
-
-            } else {
-                val isTitleLengthExceeded = title.isTextMaxLengthExceeded()
-                if (isTitleLengthExceeded || plainText.isTextMaxLengthExceeded()) {
-                    withTextStyle {
-                        title { title }
-                        bigText { plainText }
-                        // Trying to select optimal behaviour.
-                        // If title max available length for notification was exceeded -
-                        // style will override title when notification will expand.
-                        behaviour {
-                            if (isTitleLengthExceeded) StyleBehaviour.OVERRIDE else StyleBehaviour.IGNORE
+            when (val imageUrl = ofImage()) {
+                null -> {
+                    val isTitleLengthExceeded = title.isTextMaxLengthExceeded()
+                    if (isTitleLengthExceeded || plainText.isTextMaxLengthExceeded()) {
+                        withTextStyle {
+                            title { title }
+                            bigText { plainText }
+                            // Trying to select optimal behaviour.
+                            // If title max available length for notification was exceeded -
+                            // style will override title when notification will expand.
+                            behaviour {
+                                if (isTitleLengthExceeded) StyleBehaviour.OVERRIDE else StyleBehaviour.IGNORE
+                            }
                         }
+                    }
+                }
+                else -> {
+                    val bitmap = runBlocking(Dispatchers.IO) {
+                        val request = ImageRequest.Builder(appContext)
+                            .data(imageUrl)
+                            .build()
+                        drawableToBitmap(
+                            Coil.imageLoader(appContext)
+                                .execute(request)
+                                .drawable
+                        )
+                    }
+                    largeIcon { bitmap }
+                    withImageStyle {
+                        behaviour { StyleBehaviour.OVERRIDE }
+                        title { title }
+                        summary { plainText }
+                        largeIcon { null }
+                        bigPicture { bitmap }
                     }
                 }
             }
@@ -89,15 +92,17 @@ fun RemoteMessage.wrap(
                 channelId { ofChannelId() }
             }
         }
-        val manualIntention = intentionClosure()
-        if (manualIntention != null) {
-            intention = manualIntention
-        } else {
-            intention {
-                autoCancel { ofAutoCancel() }
-                ofContentIntent(appContext)?.let {
-                    contentIntent(it)
+        when (val manualIntention = intentionClosure()) {
+            null -> {
+                intention {
+                    autoCancel { ofAutoCancel() }
+                    ofContentIntent(appContext)?.let {
+                        contentIntent(it)
+                    }
                 }
+            }
+            else -> {
+                intention = manualIntention
             }
         }
         identifier {
@@ -126,7 +131,8 @@ private fun RemoteMessage.ofLEDLight(): LEDLight? {
     return LEDLight(
         argb = lightSettings[0],
         onMs = lightSettings[1],
-        offMs = lightSettings[2])
+        offMs = lightSettings[2]
+    )
 }
 
 private fun RemoteMessage.ofSmallIcon(context: Context): Int {
@@ -170,7 +176,7 @@ private fun RemoteMessage.ofImage(): String? {
 }
 
 private fun RemoteMessage.ofImportance(): Importance {
-    return when(notification?.notificationPriority) {
+    return when (notification?.notificationPriority) {
         NotificationManager.IMPORTANCE_NONE -> Importance.NONE
         NotificationManager.IMPORTANCE_LOW -> Importance.LOW
         NotificationManager.IMPORTANCE_MIN -> Importance.MIN

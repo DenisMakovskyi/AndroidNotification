@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.BitmapDrawable
 
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -20,10 +20,8 @@ internal fun randomId(): Int {
 
 internal fun iconFromMetaData(context: Context): Int {
     val info = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-
     val iconRes = info.metaData.getInt("com.google.firebase.messaging.default_notification_icon")
     val appIcon = info.icon
-
     return if (iconRes != 0) iconRes else appIcon
 }
 

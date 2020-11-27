@@ -89,23 +89,26 @@ class PendingIntentBuilder {
         require(taskStackElements.isNotEmpty()) {
             buildMessage(
                 PendingIntentBuilder::class,
-                "Can not create pending intent from empty tasks list")
+                "Can not create pending intent from empty tasks list"
+            )
         }
         val context = requireNotNull(packageContext) {
             buildMessage(
                 PendingIntentBuilder::class,
-                "To create pending intent, please pass your package context")
+                "To create pending intent, please pass your package context"
+            )
         }
-        return when(targetIntent) {
+        return when (targetIntent) {
             From.SERVICE -> {
-                val intent = taskStackElements.fromFirst { e -> e?.intent }
-                if (intent != null) {
-                    PendingIntent.getService(context, requestCode, intent, pendingFlags)
-                } else {
-                    throw IllegalArgumentException(
-                        buildMessage(
-                            PendingIntentBuilder::class,
-                            "Can not create pending intent from empty intent"))
+                when (val intent = taskStackElements.fromFirst { it?.intent }) {
+                    null ->
+                        throw IllegalArgumentException(
+                            buildMessage(
+                                PendingIntentBuilder::class,
+                                "Can not create pending intent from empty intent"
+                            )
+                        )
+                    else -> PendingIntent.getService(context, requestCode, intent, pendingFlags)
                 }
             }
             From.ACTIVITY -> {
@@ -113,12 +116,11 @@ class PendingIntentBuilder {
                     taskStackElements.fromFirst { e -> e?.intent }.let { intent ->
                         PendingIntent.getActivity(context, requestCode, intent, pendingFlags)
                     }
-
                 } else {
                     requireNotNull(TaskStackBuilder.create(context).run {
                         for (element in taskStackElements) {
                             element.intent.safe { intent ->
-                                when(element.howPut) {
+                                when (element.howPut) {
                                     HowPut.ONLY_NEXT_INTENT -> addNextIntent(intent)
                                     HowPut.ONLY_EXTRACT_PARENT -> addParentStack(intent.component)
                                     HowPut.NEXT_INTENT_WITH_PARENT -> addNextIntentWithParentStack(intent)
@@ -130,14 +132,15 @@ class PendingIntentBuilder {
                 }
             }
             From.BROADCAST -> {
-                val intent = taskStackElements.fromFirst { e -> e?.intent }
-                if (intent != null) {
-                    PendingIntent.getBroadcast(context, requestCode, intent, pendingFlags)
-                } else {
-                    throw IllegalArgumentException(
-                        buildMessage(
-                            PendingIntentBuilder::class,
-                            "Can not create pending intent from empty intent"))
+                when (val intent = taskStackElements.fromFirst { e -> e?.intent }) {
+                    null ->
+                        throw IllegalArgumentException(
+                            buildMessage(
+                                PendingIntentBuilder::class,
+                                "Can not create pending intent from empty intent"
+                            )
+                        )
+                    else -> PendingIntent.getBroadcast(context, requestCode, intent, pendingFlags)
                 }
             }
         }
@@ -192,7 +195,8 @@ class NavPendingIntentBuilder {
         val context = requireNotNull(packageContext) {
             buildMessage(
                 NavPendingIntentBuilder::class,
-                "To create pending intent, please pass your package context")
+                "To create pending intent, please pass your package context"
+            )
         }
         return NavDeepLinkBuilder(context)
             .also { builder ->
@@ -228,7 +232,8 @@ data class Intention(
         constructor(intention: Intention) : this(
             intention.autoCancel,
             intention.deleteIntent,
-            intention.contentIntent)
+            intention.contentIntent
+        )
 
         fun autoCancel(init: () -> Boolean) {
             autoCancel = init()
@@ -276,4 +281,5 @@ data class Intention(
     }
 }
 
-fun notificationIntention(init: Intention.Builder.() -> Unit): Intention = Intention.Builder().build(init)
+fun notificationIntention(init: Intention.Builder.() -> Unit): Intention =
+    Intention.Builder().build(init)

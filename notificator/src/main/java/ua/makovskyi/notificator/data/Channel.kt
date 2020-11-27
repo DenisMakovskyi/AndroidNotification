@@ -56,7 +56,8 @@ data class ChannelInfo(
         constructor(info: ChannelInfo) : this(
             info.channelId,
             info.channelName,
-            info.channelDescription)
+            info.channelDescription
+        )
 
         fun channelId(init: () -> String) {
             channelId = init()
@@ -107,7 +108,8 @@ data class GroupingParams(
         constructor(params: GroupingParams) : this(
             params.groupId,
             params.groupName,
-            params.groupDescription)
+            params.groupDescription
+        )
 
         fun groupId(init: () -> String?) {
             groupId = init()
@@ -162,7 +164,8 @@ data class Channel(
             channel.visibility,
             channel.importance,
             channel.channelInfo,
-            channel.groupingParams)
+            channel.groupingParams
+        )
 
         fun visibility(init: () -> Int) {
             visibility = init()

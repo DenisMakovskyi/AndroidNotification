@@ -95,12 +95,13 @@ class IntentBuilder {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun build(): Intent {
-        return when(from) {
+        return when (from) {
             ConstructFrom.ACTION -> {
                 requireNotNull(intentAction) {
                     buildMessage(
                         IntentBuilder::class,
-                        "Can not create intent from empty action")
+                        "Can not create intent from empty action"
+                    )
                 }
                 Intent(intentAction)
             }
@@ -108,12 +109,14 @@ class IntentBuilder {
                 requireNotNull(context) {
                     buildMessage(
                         IntentBuilder::class,
-                        "Can not create intent from empty package context")
+                        "Can not create intent from empty package context"
+                    )
                 }
                 requireNotNull(targetClass) {
                     buildMessage(
                         IntentBuilder::class,
-                        "Can not create intent from empty target class")
+                        "Can not create intent from empty target class"
+                    )
                 }
                 Intent(context, targetClass).also { intent ->
                     this@IntentBuilder.intentAction.safe { action ->

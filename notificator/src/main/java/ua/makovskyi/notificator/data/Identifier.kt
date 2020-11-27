@@ -30,7 +30,8 @@ data class Identifier(
             identifier.ongoing,
             identifier.sortKey,
             identifier.groupKey,
-            identifier.category)
+            identifier.category
+        )
 
         fun id(init: () -> Int) {
             id = init()

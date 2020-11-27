@@ -27,7 +27,8 @@ import ua.makovskyi.notificator.utils.defaultNotificationSound
 data class LEDLight(
     val argb: Int = Color.BLUE,
     val onMs: Int = TimeUnit.SECONDS.toMillis(1).toInt(),
-    val offMs: Int = TimeUnit.SECONDS.toMillis(1).toInt())
+    val offMs: Int = TimeUnit.SECONDS.toMillis(1).toInt()
+)
 
 /**
  * Notification sound capture policy.
@@ -74,7 +75,8 @@ data class Alarm(
             alarm.sound,
             alarm.vibrate,
             alarm.ledLight,
-            alarm.capturePolicy)
+            alarm.capturePolicy
+        )
 
         fun sound(init: () -> Uri?) {
             sound = init()

@@ -37,7 +37,8 @@ data class Notification(
             notification.content,
             notification.channel,
             notification.intention,
-            notification.identifier)
+            notification.identifier
+        )
 
         fun alarm(init: Alarm.Builder.() -> Unit) {
             alarm = Alarm.Builder().build(init)
