@@ -3,7 +3,6 @@ package ua.makovskyi.notificator.data
 import android.app.NotificationManager.*
 
 import androidx.annotation.RestrictTo
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.*
 
 import ua.makovskyi.notificator.dsl.ChannelMarker

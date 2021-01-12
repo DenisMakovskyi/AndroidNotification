@@ -24,9 +24,13 @@ object Notificator {
         val notificationManager = NotificationManagerCompat.from(context)
         val androidNotification = buildAndroidNotification(context, notification)
         if (isApiLevel(Build.VERSION_CODES.O)) {
-            createNotificationChannel(context, notification.channel, notification.alarm)
+            createNotificationChannel(
+                context, notification.channel, notification.alarm
+            )
         }
-        notificationManager.notify(notification.identifier.id, androidNotification)
+        notificationManager.notify(
+            notification.identifier.id, androidNotification
+        )
     }
 
     fun buildAndroidNotification(

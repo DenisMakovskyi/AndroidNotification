@@ -48,10 +48,15 @@ internal fun drawableToBitmap(drawable: Drawable?): Bitmap? {
         if (drawable.bitmap != null) return drawable.bitmap
     }
 
-    if (drawable.intrinsicWidth <= 0 && drawable.intrinsicHeight <= 0) return null
+    if (
+        drawable.intrinsicWidth <= 0 &&
+        drawable.intrinsicHeight <= 0
+    ) return null
 
     return Bitmap.createBitmap(
-        drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+        drawable.intrinsicWidth,
+        drawable.intrinsicHeight,
+        Bitmap.Config.ARGB_8888
     ).also {
         val canvas = Canvas(it)
         drawable.setBounds(0, 0, canvas.width, canvas.height)

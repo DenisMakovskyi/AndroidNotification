@@ -8,8 +8,8 @@ import androidx.annotation.RestrictTo
 import androidx.core.app.NotificationCompat
 
 import ua.makovskyi.notificator.dsl.ContentMarker
-import ua.makovskyi.notificator.dsl.NotificationMarker
 import ua.makovskyi.notificator.dsl.SemanticMarker
+import ua.makovskyi.notificator.dsl.NotificationMarker
 
 /**
  * @author Denis Makovskyi
