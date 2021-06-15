@@ -41,6 +41,11 @@ object Notificator {
         context.cancelNotifications()
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun isNotificationActive(context: Context, id: Int): Boolean {
+        return context.notificationManager.isNotificationActive(id)
+    }
+
     fun buildAndroidNotification(
         context: Context,
         notification: Notification
