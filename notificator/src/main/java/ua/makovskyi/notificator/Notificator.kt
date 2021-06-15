@@ -21,7 +21,7 @@ import ua.makovskyi.notificator.utils.*
 object Notificator {
 
     fun showNotification(context: Context, notification: Notification) {
-        val notificationManager = NotificationManagerCompat.from(context)
+        val notificationManager = context.notificationManagerCompat
         val androidNotification = buildAndroidNotification(context, notification)
         if (isApiLevel(Build.VERSION_CODES.O)) {
             createNotificationChannel(
@@ -31,6 +31,14 @@ object Notificator {
         notificationManager.notify(
             notification.identifier.id, androidNotification
         )
+    }
+
+    fun cancelNotification(context: Context, id: Int, tag: String? = null) {
+        context.cancelNotification(id, tag)
+    }
+
+    fun cancelNotifications(context: Context) {
+        context.cancelNotifications()
     }
 
     fun buildAndroidNotification(
@@ -65,6 +73,7 @@ object Notificator {
                 notification.content.time.safe { time ->
                     builder.setWhen(time)
                     builder.setShowWhen(true)
+                    builder.setUsesChronometer(notification.content.tick)
                 }
                 builder.setContentInfo(notification.content.info)
                 builder.setContentTitle(notification.content.title)
@@ -172,8 +181,8 @@ object Notificator {
                 // - group
                 channel.groupingParams.safe { groupingParams ->
                     if (
-                        groupingParams.groupId != null
-                        && manager.getNotificationChannelGroup(groupingParams.groupId) == null
+                        groupingParams.groupId != null &&
+                        manager.getNotificationChannelGroup(groupingParams.groupId) == null
                     ) {
                         createNotificationChannelGroup(groupingParams).safe { group ->
                             manager.createNotificationChannelGroup(group)

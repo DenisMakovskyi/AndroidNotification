@@ -4,10 +4,16 @@ import kotlin.contracts.contract
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.ExperimentalContracts
 
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.content.Context
+import android.app.NotificationManager
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.RequiresApi
+import androidx.core.content.getSystemService
+import androidx.core.app.NotificationManagerCompat
 
 /**
  * @author Denis Makovskyi
@@ -53,6 +59,26 @@ fun <V> Map<String, V?>.toBundle(): Bundle {
         }
     }
     return bundle
+}
+
+val Context.notificationManager: NotificationManager?
+    get() = getSystemService()
+
+val Context.notificationManagerCompat: NotificationManagerCompat
+    get() = NotificationManagerCompat.from(this)
+
+fun Context.cancelNotification(id: Int, tag: String? = null) {
+    notificationManager?.cancel(tag, id)
+}
+
+fun Context.cancelNotifications() {
+    notificationManager?.cancelAll()
+}
+
+@RequiresApi(Build.VERSION_CODES.M)
+fun NotificationManager?.isNotificationActive(id: Int): Boolean {
+    if (this == null) return false
+    return activeNotifications.find { it.id == id } != null
 }
 
 @OptIn(ExperimentalContracts::class)

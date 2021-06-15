@@ -160,6 +160,7 @@ fun semanticAction(init: SemanticActionBuilder.() -> Unit): NotificationCompat.A
 
 data class Content(
     val color: Int,
+    val tick: Boolean,
     val time: Long?,
     val info: String?,
     val title: String?,
@@ -174,6 +175,7 @@ data class Content(
     class Builder(
         @ColorInt
         private var color: Int = 0,
+        private var tick: Boolean = false,
         private var time: Long? = null,
         private var info: String? = null,
         private var title: String? = null,
@@ -185,6 +187,7 @@ data class Content(
 
         constructor(content: Content) : this(
             content.color,
+            content.tick,
             content.time,
             content.info,
             content.title,
@@ -200,6 +203,10 @@ data class Content(
 
         fun color(init: () -> Int) {
             color = init()
+        }
+
+        fun tick(init: () -> Boolean) {
+            tick = init()
         }
 
         fun time(init: () -> Long?) {
@@ -256,7 +263,7 @@ data class Content(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun build(): Content =
-            Content(color, time, info, title, plainText, largeIcon, contentStyle, semanticActions)
+            Content(color, tick, time, info, title, plainText, largeIcon, contentStyle, semanticActions)
 
         internal fun build(init: Builder.() -> Unit): Content {
             init()
